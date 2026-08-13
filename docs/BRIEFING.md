@@ -96,7 +96,9 @@ Campos mínimos:
 - Verificação humana simples: selecionar os **dois objetos iguais**
 
 ### Confirmação de e-mail
-Por decisão de produto, o MVP **não exige confirmação de e-mail**. A configuração `Confirm email` do Supabase Auth deve estar desativada antes do release.
+O MVP exige confirmação de e-mail. O Supabase Auth gera e valida os tokens, e o Send Email Hook substitui o envio nativo pelo Resend usando remetente verificado em `soberania.tech`.
+
+O mesmo canal entrega a confirmação de cadastro e a recuperação de senha. Links são trocados por sessão no callback PKCE do aplicativo e não expõem tokens sensíveis em logs.
 
 O primeiro usuário do banco vira administrador. Os usuários seguintes entram inativos e aguardam aprovação do administrador, evitando que uma conta recém-criada acesse dados operacionais automaticamente.
 
@@ -131,6 +133,7 @@ Direção visual:
 - **Hospedagem:** Vercel.
 - **Banco:** Supabase Postgres.
 - **Autenticação:** Supabase Auth.
+- **E-mails de autenticação:** Resend via Supabase Send Email Hook assinado.
 - **Sincronização:** Supabase Realtime.
 - **Segurança:** PostgreSQL Row Level Security por organização e papel.
 - **Repositório:** Git local; GitHub remoto será conectado quando a integração estiver disponível.
@@ -147,6 +150,8 @@ Tabelas do MVP:
 ## 15. Telas do MVP
 - Login
 - Criar conta
+- Esqueci minha senha
+- Redefinir senha
 - Acesso pendente
 - Agenda do dia
 - Novo agendamento

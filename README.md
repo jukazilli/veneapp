@@ -6,29 +6,32 @@ MVP mobile-first para sincronizar agenda, atendimento, faturamento e comissões 
 
 - Next.js 16 + TypeScript
 - Supabase Postgres, Auth e Realtime
+- Resend para e-mails transacionais de autenticação
 - Vercel para frontend e Server Actions
 
 ## Fluxo implementado
 
-1. Login/cadastro com e-mail e senha.
-2. Cadastro possui verificação leve de dois objetos iguais.
-3. Primeiro usuário vira administrador; os seguintes aguardam ativação.
-4. Agente/admin cria o agendamento com cliente, horário, preço, duração e atendente.
-5. Atendente recebe sua agenda via Supabase Realtime.
-6. Agente/admin pode remarcar, alterar valor, concluir, cancelar ou marcar falta.
-7. Mudanças relevantes ficam registradas no histórico.
-8. Fechamento diário e relatórios calculam faturamento, comissão, pagamentos do período e saldo acumulado conforme o papel logado.
-9. Admin configura comissão fixa ou percentual e duração padrão.
+1. Login/cadastro com e-mail, senha e confirmação do endereço.
+2. Recuperação e redefinição de senha por link seguro enviado pelo Resend.
+3. Cadastro possui verificação leve de dois objetos iguais.
+4. Primeiro usuário vira administrador; os seguintes aguardam ativação.
+5. Agente/admin cria o agendamento com cliente, horário, preço, duração e atendente.
+6. Atendente recebe sua agenda via Supabase Realtime.
+7. Agente/admin pode remarcar, alterar valor, concluir, cancelar ou marcar falta.
+8. Mudanças relevantes ficam registradas no histórico.
+9. Fechamento diário e relatórios calculam faturamento, comissão, pagamentos do período e saldo acumulado conforme o papel logado.
+10. Admin configura comissão fixa ou percentual e duração padrão.
 
 ## Rodar localmente
 
 1. Copie `.env.example` para `.env.local`.
-2. Preencha as variáveis do Supabase.
+2. Preencha as variáveis do Supabase e do Resend descritas no arquivo.
 3. Gere um `ANTI_SPAM_SECRET` aleatório com pelo menos 24 caracteres.
-4. No Supabase Auth, desative `Confirm email` para o fluxo de cadastro imediato definido para o MVP.
-5. Execute `npm install`.
-6. Execute `npm run verify`.
-7. Execute `npm run dev` e siga o smoke test em `docs/DEPLOYMENT.md`.
+4. Verifique `soberania.tech` no Resend e use `Veneapp <acesso@soberania.tech>` como remetente.
+5. No Supabase Auth, mantenha `Confirm email` ativado e configure o Send Email Hook HTTPS para `/api/auth/send-email`.
+6. Execute `npm install`.
+7. Execute `npm run verify`.
+8. Execute `npm run dev` e siga o smoke test em `docs/DEPLOYMENT.md`.
 
 ## Release
 
@@ -45,4 +48,4 @@ O deploy só deve acontecer depois de todos os gates em [`docs/DEPLOYMENT.md`](d
 
 ## Status atual
 
-Banco e código-base do MVP existem. O próximo bloqueio de release é executar instalação das dependências, gerar lockfile, rodar `typecheck/lint/build` e validar o fluxo crítico localmente antes de criar o projeto Vercel.
+O projeto Git está conectado ao Vercel em `feather-tecnologias/veneapp-9sff`. Antes do smoke de autenticação, configure as variáveis do Resend e ative o Auth Hook no Supabase.
