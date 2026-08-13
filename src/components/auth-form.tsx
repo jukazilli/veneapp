@@ -2,11 +2,13 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import { loginAction, signupAction } from '@/app/auth-actions'
+import { loginAction, signupAction, type AuthActionState } from '@/app/auth-actions'
 import { HumanCheck } from '@/components/human-check'
 
+const initialAuthState: AuthActionState = {}
+
 export function LoginForm() {
-  const [state, action, pending] = useActionState(loginAction, {})
+  const [state, action, pending] = useActionState(loginAction, initialAuthState)
   return <form action={action} className="form">
     {state?.error && <div className="notice error">{state.error}</div>}
     <div className="field"><label>E-mail</label><input className="input" name="email" type="email" autoComplete="email" inputMode="email" required /></div>
@@ -17,7 +19,7 @@ export function LoginForm() {
 }
 
 export function SignupForm({ challenge }: { challenge: { items: string[]; token: string } }) {
-  const [state, action, pending] = useActionState(signupAction, {})
+  const [state, action, pending] = useActionState(signupAction, initialAuthState)
   return <form action={action} className="form">
     {state?.error && <div className="notice error">{state.error}</div>}
     {state?.success && <div className="notice success-box">{state.success}</div>}

@@ -4,7 +4,12 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { verifyHumanChallenge } from '@/lib/human-challenge'
 
-export async function loginAction(_: { error?: string }, formData: FormData) {
+export type AuthActionState = {
+  error?: string
+  success?: string
+}
+
+export async function loginAction(_: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const email = String(formData.get('email') || '').trim().toLowerCase()
   const password = String(formData.get('password') || '')
   if (!email || !password) return { error: 'Informe e-mail e senha.' }
@@ -15,7 +20,7 @@ export async function loginAction(_: { error?: string }, formData: FormData) {
   redirect('/agenda')
 }
 
-export async function signupAction(_: { error?: string; success?: string }, formData: FormData) {
+export async function signupAction(_: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const fullName = String(formData.get('full_name') || '').trim()
   const email = String(formData.get('email') || '').trim().toLowerCase()
   const password = String(formData.get('password') || '')
