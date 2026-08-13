@@ -1,0 +1,35 @@
+{
+  "name": "veneapp",
+  "version": "0.2.2",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run preflight && npm run test:logic && npm run typecheck && npm run lint && npm run build",
+    "test:logic": "node --experimental-strip-types --test tests/core-logic.test.ts",
+    "preflight": "node scripts/preflight.mjs",
+    "smoke:preview": "node scripts/smoke-preview.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.4",
+    "@supabase/supabase-js": "2.111.0",
+    "next": "16.1.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.2",
+    "eslint-config-next": "16.1.6",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "type": "module"
+}

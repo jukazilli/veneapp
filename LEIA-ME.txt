@@ -1,0 +1,16 @@
+VENEAPP 0.2.2 — PUBLICAÇÃO NO GITHUB
+
+1. Extraia este ZIP em uma pasta local.
+2. Clique com o botão direito em publish-veneapp.ps1 e execute com PowerShell,
+   ou abra PowerShell na pasta e rode:
+
+   powershell -ExecutionPolicy Bypass -File .\publish-veneapp.ps1
+
+O script:
+- clona https://github.com/jukazilli/veneapp.git (main)
+- substitui o conteúdo pelo RC validado
+- impede publicação de .env.local
+- cria commit "release: Veneapp 0.2.2"
+- faz push para main
+
+Pré-requisito: Git for Windows instalado e sua conta GitHub autenticada para push.
