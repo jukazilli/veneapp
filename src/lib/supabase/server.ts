@@ -7,7 +7,7 @@ export async function createClient() {
   return createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookies: {
       getAll() { return cookieStore.getAll() },
-      setAll(cookiesToSet, _headers) {
+      setAll(cookiesToSet) {
         try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) }
         catch { /* proxy.ts refreshes sessions when Server Components cannot write cookies */ }
       },

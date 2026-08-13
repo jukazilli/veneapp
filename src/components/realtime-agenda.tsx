@@ -13,6 +13,7 @@ const statusClass = { scheduled: '', completed: 'success', cancelled: 'danger', 
 export function RealtimeAgenda({ appointments, organizationId }: { appointments: Appointment[]; organizationId: string }) {
   const router = useRouter()
   const [syncing, setSyncing] = useState(false)
+  const [now, setNow] = useState<number | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
@@ -26,13 +27,23 @@ export function RealtimeAgenda({ appointments, organizationId }: { appointments:
     return () => { void supabase.removeChannel(channel) }
   }, [organizationId, router])
 
+  useEffect(() => {
+    const refreshNow = () => setNow(Date.now())
+    refreshNow()
+    const interval = window.setInterval(refreshNow, 60_000)
+    return () => window.clearInterval(interval)
+  }, [])
+
   const summary = useMemo(() => ({
     scheduled: appointments.filter(item => item.status === 'scheduled').length,
     completed: appointments.filter(item => item.status === 'completed').length,
     cancelled: appointments.filter(item => item.status === 'cancelled').length,
   }), [appointments])
 
-  const nextId = useMemo(() => appointments.find(item => item.status === 'scheduled' && new Date(item.starts_at).getTime() >= Date.now())?.id, [appointments])
+  const nextId = useMemo(() => now === null
+    ? undefined
+    : appointments.find(item => item.status === 'scheduled' && new Date(item.starts_at).getTime() >= now)?.id,
+  [appointments, now])
 
   return <div className="stack">
     <div className="agenda-summary" aria-label="Resumo da agenda">
