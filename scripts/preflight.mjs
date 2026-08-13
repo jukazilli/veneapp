@@ -41,7 +41,8 @@ function walk(dir) {
     return stat.isFile() ? [full] : []
   })
 }
-const scanFiles = walk(root).filter(file => /\.(ts|tsx|js|mjs|json|md|css)$/.test(file) && !file.endsWith('scripts/preflight.mjs'))
+const preflightFile = path.resolve(root, 'scripts', 'preflight.mjs')
+const scanFiles = walk(root).filter(file => /\.(ts|tsx|js|mjs|json|md|css)$/.test(file) && path.resolve(file) !== preflightFile)
 const legacy = scanFiles.filter(file => /AgendaSync|agendasync/i.test(fs.readFileSync(file,'utf8')))
 legacy.length === 0 ? ok('sem referências legadas a AgendaSync') : fail(`referências legadas: ${legacy.map(f=>path.relative(root,f)).join(', ')}`)
 
