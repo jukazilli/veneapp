@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from 'next'
+import { Nunito } from 'next/font/google'
 import './globals.css'
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-nunito',
+})
 
 export const metadata: Metadata = {
   title: { default: 'Veneapp', template: '%s · Veneapp' },
@@ -21,5 +28,5 @@ export const viewport: Viewport = {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body>{children}</body></html>
+  return <html lang="pt-BR" className={nunito.variable}><body>{children}</body></html>
 }

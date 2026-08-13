@@ -9,7 +9,7 @@ export default function SignupPage() {
     <div className="brand">veneapp<span>.</span></div>
     <div className="eyebrow auth-eyebrow">Novo acesso</div>
     <h1>Crie sua conta.</h1>
-    <p className="muted">Sem confirmação por e-mail. Depois do cadastro, o administrador define seu acesso à operação.</p>
+    <p className="muted">Confirme seu e-mail para proteger a conta. Depois, o administrador define seu acesso à operação.</p>
     <div className="card auth-card"><SignupForm challenge={challenge} /></div>
   </div></main>
 }

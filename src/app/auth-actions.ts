@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { verifyHumanChallenge } from '@/lib/human-challenge'
+import { getRequestOrigin } from '@/lib/site-url'
 
 export type AuthActionState = {
   error?: string
@@ -16,6 +17,9 @@ export async function loginAction(_: AuthActionState, formData: FormData): Promi
 
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error?.message.toLowerCase().includes('email not confirmed')) {
+    return { error: 'Confirme seu e-mail antes de entrar. Confira também a pasta de spam.' }
+  }
   if (error) return { error: 'Não foi possível entrar. Confira seu e-mail e senha.' }
   redirect('/agenda')
 }
@@ -33,10 +37,14 @@ export async function signupAction(_: AuthActionState, formData: FormData): Prom
   if (!verifyHumanChallenge(humanToken, humanSelection)) return { error: 'Selecione corretamente os dois objetos iguais e tente novamente.' }
 
   const supabase = await createClient()
+  const origin = await getRequestOrigin()
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: {
+      data: { full_name: fullName },
+      emailRedirectTo: `${origin}/auth/confirm?next=/agenda`,
+    },
   })
 
   if (error) {
@@ -45,10 +53,42 @@ export async function signupAction(_: AuthActionState, formData: FormData): Prom
   }
 
   if (!data.session) {
-    return { error: 'O cadastro foi criado, mas o Supabase ainda está exigindo confirmação de e-mail. Desative “Confirm email” no Auth antes do release.' }
+    return { success: 'Cadastro recebido. Enviamos um link de confirmação para o seu e-mail.' }
   }
 
   redirect('/agenda')
+}
+
+export async function forgotPasswordAction(_: AuthActionState, formData: FormData): Promise<AuthActionState> {
+  const email = String(formData.get('email') || '').trim().toLowerCase()
+  if (!email) return { error: 'Informe seu e-mail.' }
+
+  const supabase = await createClient()
+  const origin = await getRequestOrigin()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/confirm?next=/redefinir-senha`,
+  })
+
+  if (error) return { error: 'Não foi possível solicitar a redefinição agora. Tente novamente em alguns minutos.' }
+  return { success: 'Se existir uma conta com este e-mail, você receberá um link para criar uma nova senha.' }
+}
+
+export async function updatePasswordAction(_: AuthActionState, formData: FormData): Promise<AuthActionState> {
+  const password = String(formData.get('password') || '')
+  const passwordConfirmation = String(formData.get('password_confirmation') || '')
+
+  if (password.length < 8) return { error: 'A nova senha precisa ter pelo menos 8 caracteres.' }
+  if (password !== passwordConfirmation) return { error: 'As senhas não coincidem.' }
+
+  const supabase = await createClient()
+  const { data: claims } = await supabase.auth.getClaims()
+  if (!claims?.claims?.sub) return { error: 'Este link expirou ou já foi usado. Solicite uma nova redefinição.' }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: 'Não foi possível atualizar sua senha. Solicite um novo link e tente novamente.' }
+
+  await supabase.auth.signOut()
+  redirect('/login?password=updated')
 }
 
 export async function logoutAction() {

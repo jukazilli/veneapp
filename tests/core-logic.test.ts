@@ -11,6 +11,7 @@ import {
 } from '../src/lib/dates.ts'
 import { money, whatsappUrl } from '../src/lib/format.ts'
 import { outstandingCommissionBalance } from '../src/lib/finance.ts'
+import { buildAuthActionUrl, renderAuthEmail, type SendEmailHookPayload } from '../src/lib/auth-email.ts'
 
 process.env.ANTI_SPAM_SECRET = 'veneapp-test-secret-with-more-than-24-characters'
 
@@ -107,4 +108,41 @@ test('saldo de comissão é acumulado e preserva dívida de períodos anteriores
   ]
   const payments = [{ amount: 20 }, { amount: '10.50' }]
   assert.equal(outstandingCommissionBalance(commissions, payments), 50)
+})
+
+test('link de autenticação mantém apenas um próximo destino interno', () => {
+  const emailData: SendEmailHookPayload['email_data'] = {
+    token: '123456',
+    token_hash: 'safe-token-hash',
+    redirect_to: 'https://veneapp-9sff.vercel.app/auth/confirm?next=/redefinir-senha',
+    email_action_type: 'recovery',
+    site_url: 'https://veneapp-9sff.vercel.app',
+  }
+
+  const url = new URL(buildAuthActionUrl(emailData))
+  assert.equal(url.origin, 'https://veneapp-9sff.vercel.app')
+  assert.equal(url.pathname, '/auth/confirm')
+  assert.equal(url.searchParams.get('token_hash'), 'safe-token-hash')
+  assert.equal(url.searchParams.get('type'), 'recovery')
+  assert.equal(url.searchParams.get('next'), '/redefinir-senha')
+
+  emailData.redirect_to = 'https://veneapp-9sff.vercel.app/auth/confirm?next=//evil.example'
+  assert.equal(new URL(buildAuthActionUrl(emailData)).searchParams.has('next'), false)
+})
+
+test('template do Resend escapa metadados do usuário', () => {
+  const email = renderAuthEmail({
+    user: { email: 'user@example.com', user_metadata: { full_name: '<script>alert(1)</script>' } },
+    email_data: {
+      token: '123456',
+      token_hash: 'safe-token-hash',
+      redirect_to: 'https://veneapp-9sff.vercel.app/auth/confirm?next=/agenda',
+      email_action_type: 'signup',
+      site_url: 'https://veneapp-9sff.vercel.app',
+    },
+  })
+
+  assert.doesNotMatch(email.html, /<script>/)
+  assert.match(email.html, /&lt;script&gt;/)
+  assert.match(email.subject, /Confirme seu e-mail/)
 })
