@@ -28,10 +28,10 @@ MVP mobile-first para sincronizar agenda, atendimento, faturamento e comissões 
 
 1. Copie `.env.example` para `.env.local`.
 2. Preencha as variáveis do Supabase e do Resend descritas no arquivo.
-3. Configure `SUPABASE_SERVICE_ROLE_KEY` somente no servidor para provisionar os convites.
-4. Gere um `ANTI_SPAM_SECRET` aleatório com pelo menos 24 caracteres.
-5. Verifique `soberania.tech` no Resend e use `Veneapp <acesso@soberania.tech>` como remetente.
-6. No Supabase Auth, mantenha `Confirm email` ativado e configure o Send Email Hook HTTPS para `/api/auth/send-email`.
+3. Gere um `ANTI_SPAM_SECRET` aleatório com pelo menos 24 caracteres.
+4. Verifique `soberania.tech` no Resend e use `Veneapp <acesso@soberania.tech>` como remetente.
+5. No Supabase Auth, mantenha `Confirm email` ativado e configure o Send Email Hook HTTPS para `/api/auth/send-email`.
+6. Implante a Edge Function autenticada `provision-member`; o segredo administrativo permanece no ambiente gerenciado do Supabase.
 7. Execute `npm install`.
 8. Execute `npm run verify`.
 9. Execute `npm run dev` e siga o smoke test em `docs/DEPLOYMENT.md`.

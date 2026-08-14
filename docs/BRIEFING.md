@@ -107,7 +107,7 @@ O mesmo canal entrega a confirmação de cadastro e a recuperação de senha. Li
 
 Cada cadastro público cria uma organização isolada e torna a pessoa seu `owner` ativo. Após confirmar o e-mail, ela informa o nome da organização e convida a primeira pessoa como administrador, agente ou atendente.
 
-Contas da equipe não são criadas pelo cadastro público dentro de um tenant existente. Proprietário ou administrador provisiona o convite no servidor, define uma senha temporária e escolhe o papel. As credenciais seguem por Resend, podem ser compartilhadas por WhatsApp e a senha precisa ser trocada no primeiro acesso.
+Contas da equipe não são criadas pelo cadastro público dentro de um tenant existente. Proprietário ou administrador chama uma Edge Function autenticada do Supabase, define uma senha temporária e escolhe o papel. O segredo privilegiado permanece no ambiente gerenciado do Supabase. As credenciais seguem por Resend, podem ser compartilhadas por WhatsApp e a senha precisa ser trocada no primeiro acesso.
 
 A verificação de objetos é uma barreira leve contra spam. Para uma abertura pública em escala, a evolução recomendada é ativar CAPTCHA/Turnstile nativo do Supabase Auth além dos rate limits.
 

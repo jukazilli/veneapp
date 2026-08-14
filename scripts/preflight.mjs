@@ -24,6 +24,7 @@ const required = [
   'src/app/auth/confirm/route.ts','src/app/api/auth/send-email/route.ts',
   'src/app/(app)/agenda/page.tsx','src/app/(app)/fechamento/page.tsx',
   'src/app/(app)/relatorios/page.tsx','src/app/api/health/route.ts',
+  'supabase/functions/provision-member/index.ts',
   'src/lib/supabase/client.ts','src/lib/supabase/server.ts','src/lib/supabase/proxy.ts',
   'src/lib/supabase/config.ts','src/lib/human-challenge.ts','src/lib/finance.ts','tests/core-logic.test.ts','scripts/smoke-preview.mjs',
 ]
@@ -43,7 +44,6 @@ const envExample = fs.readFileSync(path.join(root,'.env.example'),'utf8')
 check(envExample.includes('ycgmzgxvksmsaeelymsu.supabase.co'), 'URL Supabase aponta para veneapp', 'URL Supabase incorreta')
 check(envExample.includes('sb_publishable_'), 'publishable key moderna configurada no exemplo', 'publishable key ausente')
 check(envExample.includes('ANTI_SPAM_SECRET'), 'ANTI_SPAM_SECRET documentado', 'ANTI_SPAM_SECRET ausente')
-check(envExample.includes('SUPABASE_SERVICE_ROLE_KEY'), 'SUPABASE_SERVICE_ROLE_KEY documentada', 'SUPABASE_SERVICE_ROLE_KEY ausente')
 check(envExample.includes('RESEND_API_KEY'), 'RESEND_API_KEY documentada', 'RESEND_API_KEY ausente')
 check(envExample.includes('RESEND_FROM_EMAIL'), 'remetente Resend documentado', 'RESEND_FROM_EMAIL ausente')
 check(envExample.includes('SEND_EMAIL_HOOK_SECRET'), 'segredo do Auth Hook documentado', 'SEND_EMAIL_HOOK_SECRET ausente')

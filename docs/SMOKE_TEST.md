@@ -37,4 +37,4 @@ O script valida:
 
 ## Gate de produção
 
-Não promover a Preview se qualquer item acima falhar. Produção também exige `ANTI_SPAM_SECRET` com pelo menos 24 caracteres, `SUPABASE_SERVICE_ROLE_KEY` somente no servidor, segredo de hook gerado pelo Supabase e domínio remetente verificado no Resend.
+Não promover a Preview se qualquer item acima falhar. Produção também exige `ANTI_SPAM_SECRET` com pelo menos 24 caracteres, Edge Function `provision-member` ativa, segredo de hook gerado pelo Supabase e domínio remetente verificado no Resend.

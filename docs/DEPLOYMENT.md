@@ -17,6 +17,7 @@ O deploy só acontece depois que todos os gates anteriores estiverem verdes. Uma
 - [x] Snapshot de comissão
 - [x] Proprietário único e protegido por organização
 - [x] Tenant e papel de convite validados a partir de `app_metadata` do servidor
+- [x] Provisionamento privilegiado isolado em Edge Function autenticada do Supabase
 - [x] Realtime nas entidades operacionais
 - [x] Sem novo alerta de RLS ou função pública no Security Advisor
 - [ ] Ativar proteção contra senhas vazadas no Supabase Auth
@@ -95,7 +96,6 @@ Somente após o Gate 5:
 - [x] Usar o projeto Vercel `feather-tecnologias/veneapp-9sff`, conectado ao GitHub
 - [ ] Configurar `NEXT_PUBLIC_SUPABASE_URL`
 - [ ] Configurar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- [ ] Configurar `SUPABASE_SERVICE_ROLE_KEY` somente no servidor
 - [ ] Configurar `ANTI_SPAM_SECRET`
 - [ ] Configurar `NEXT_PUBLIC_SITE_URL`
 - [ ] Configurar `RESEND_API_KEY` (ou `RESEND_KEY`)

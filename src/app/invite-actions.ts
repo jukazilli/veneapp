@@ -11,7 +11,6 @@ import {
 } from '@/lib/invitations'
 import { requireUser } from '@/lib/session'
 import { getRequestOrigin } from '@/lib/site-url'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 export type InviteMemberState = {
   error?: string
@@ -68,30 +67,17 @@ export async function inviteMemberAction(_: InviteMemberState, formData: FormDat
   }
 
   const organizationName = isOnboarding ? requestedOrganizationName : organization.name
-  let adminClient: ReturnType<typeof createAdminClient>
-  try {
-    adminClient = createAdminClient()
-  } catch {
-    return { error: 'Os convites ainda não estão configurados no servidor.' }
-  }
-
-  const { data: created, error: createError } = await adminClient.auth.admin.createUser({
+  const { data: created, error: createError } = await supabase.functions.invoke('provision-member', { body: {
+    action: 'invite',
     email,
     password: temporaryPassword,
-    email_confirm: true,
-    user_metadata: { full_name: fullName },
-    app_metadata: {
-      veneapp_invitation: true,
-      organization_id: profile.organization_id,
-      organization_role: role,
-      invited_by: profile.id,
-    },
-  })
+    fullName,
+    role,
+  } })
 
-  if (createError || !created.user) {
-    const alreadyExists = createError?.message.toLowerCase().includes('already')
-      || createError?.message.toLowerCase().includes('registered')
-    return { error: alreadyExists ? 'Este e-mail já possui uma conta.' : 'Não foi possível criar o acesso convidado.' }
+  const createdUserId = (created as { userId?: string; error?: string } | null)?.userId
+  if (createError || !createdUserId) {
+    return { error: (created as { error?: string } | null)?.error || 'Não foi possível criar o acesso convidado.' }
   }
 
   if (isOnboarding) {
@@ -101,7 +87,7 @@ export async function inviteMemberAction(_: InviteMemberState, formData: FormDat
       .eq('id', profile.organization_id)
 
     if (onboardingError) {
-      await adminClient.auth.admin.deleteUser(created.user.id)
+      await supabase.functions.invoke('provision-member', { body: { action: 'cleanup_invite', userId: createdUserId } })
       return { error: 'Não foi possível concluir a configuração da organização.' }
     }
   }
@@ -132,7 +118,7 @@ export async function inviteMemberAction(_: InviteMemberState, formData: FormDat
     await sendTransactionalEmail({
       to: email,
       ...message,
-      idempotencyKey: `organization-invite-${created.user.id}`,
+      idempotencyKey: `organization-invite-${createdUserId}`,
     })
   } catch {
     console.error('Resend organization invitation delivery failed.')
@@ -160,21 +146,12 @@ export async function completeFirstAccessAction(_: FirstAccessState, formData: F
   if (password.length < 8) return { error: 'A nova senha precisa ter pelo menos 8 caracteres.' }
   if (password !== confirmation) return { error: 'As senhas não coincidem.' }
 
-  let adminClient: ReturnType<typeof createAdminClient>
-  try {
-    adminClient = createAdminClient()
-  } catch {
-    return { error: 'O primeiro acesso ainda não está configurado no servidor.' }
-  }
-
   const { error: passwordError } = await supabase.auth.updateUser({ password })
   if (passwordError) return { error: 'Não foi possível salvar a nova senha.' }
 
-  const { error: profileError } = await adminClient
-    .from('profiles')
-    .update({ must_change_password: false })
-    .eq('id', profile.id)
-    .eq('must_change_password', true)
+  const { error: profileError } = await supabase.functions.invoke('provision-member', {
+    body: { action: 'complete_first_access' },
+  })
   if (profileError) return { error: 'A senha mudou, mas não foi possível concluir o primeiro acesso. Entre novamente e tente concluir.' }
 
   revalidatePath('/agenda')

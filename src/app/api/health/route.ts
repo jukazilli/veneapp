@@ -10,7 +10,6 @@ export async function GET() {
     && process.env.RESEND_FROM_EMAIL
     && process.env.SEND_EMAIL_HOOK_SECRET,
   )
-  const invitationProvisioningConfigured = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
 
   try {
     const authResponse = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
@@ -25,7 +24,7 @@ export async function GET() {
       authVersion = payload?.version || null
     }
 
-    const healthy = authResponse.ok && emailDeliveryConfigured && invitationProvisioningConfigured
+    const healthy = authResponse.ok && emailDeliveryConfigured
     return Response.json({
       status: healthy ? 'ok' : 'degraded',
       app: 'veneapp',
@@ -34,7 +33,6 @@ export async function GET() {
       checks: {
         supabaseAuth: authResponse.ok ? 'ok' : `http_${authResponse.status}`,
         emailDelivery: emailDeliveryConfigured ? 'configured' : 'missing_configuration',
-        invitationProvisioning: invitationProvisioningConfigured ? 'configured' : 'missing_configuration',
       },
       supabaseAuthVersion: authVersion,
     }, {
@@ -51,7 +49,6 @@ export async function GET() {
       checks: {
         supabaseAuth: reason,
         emailDelivery: emailDeliveryConfigured ? 'configured' : 'missing_configuration',
-        invitationProvisioning: invitationProvisioningConfigured ? 'configured' : 'missing_configuration',
       },
     }, {
       status: 503,

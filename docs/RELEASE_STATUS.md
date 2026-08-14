@@ -15,7 +15,7 @@
 
 - Cada cadastro público cria uma organização isolada e um proprietário ativo.
 - O proprietário conclui o onboarding convidando a primeira pessoa.
-- Convites permitem escolher administrador, agente ou atendente e definir senha temporária.
+- Convites permitem escolher administrador, agente ou atendente e definir senha temporária; o provisionamento privilegiado fica isolado em Edge Function autenticada do Supabase.
 - O convite é enviado diretamente pelo Resend e pode ser compartilhado pelo WhatsApp.
 - A senha temporária precisa ser substituída no primeiro acesso.
 
@@ -48,7 +48,6 @@
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (somente servidor)
 - `ANTI_SPAM_SECRET`
 - `NEXT_PUBLIC_SITE_URL`
 - `RESEND_API_KEY` ou `RESEND_KEY`
