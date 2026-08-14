@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const items = [
-  ['/agenda','◷','Agenda'], ['/fechamento','◉','Fechamento'], ['/relatorios','▥','Relatórios'], ['/mais','•••','Mais']
+  ['/agenda','◷','Agenda'], ['/ajustes','＋','Ajustes'], ['/fechamento','◉','Fechamento'], ['/relatorios','▥','Relatórios'], ['/mais','•••','Mais']
 ] as const
 export function BottomNav() {
   const pathname = usePathname()

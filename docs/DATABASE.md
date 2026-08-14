@@ -21,6 +21,7 @@ Região: `sa-east-1`
 14. `20260813190000_expand_shared_agenda_and_clients`
 15. `20260813190001_fix_invited_member_tenant`
 16. `20260814014815_add_appointment_net_amount`
+17. `20260814020032_add_historical_adjustments`
 
 ## Estrutura
 
@@ -43,6 +44,8 @@ Região: `sa-east-1`
 - A regra de comissão é capturada no momento da criação e permanece no agendamento.
 - `net_amount` é uma coluna gerada pelo banco como `price - commission_amount` e representa o líquido do atendente.
 - A comissão não pode ser maior que o valor bruto do agendamento.
+- `entry_source = 'adjustment'` identifica atendimentos já realizados que alimentam o financeiro sem aparecer na agenda operacional.
+- Ajustes são sempre concluídos, não podem usar data futura e não podem ser convertidos em agendamentos comuns.
 - Mudanças futuras na configuração de comissão não alteram agendamentos existentes.
 - Cada cadastro público cria um tenant próprio e um `owner` ativo.
 - Convites entram no tenant somente por metadados de aplicação criados pelo servidor.

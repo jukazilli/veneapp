@@ -56,7 +56,7 @@ p { line-height: 1.5; }
 .button-danger { background: #fff1f0; color: var(--danger); }
 .button:disabled { opacity: .55; cursor: not-allowed; }
 .fab { position: fixed; left: 50%; transform: translateX(-50%); bottom: 78px; z-index: 10; width: min(calc(100% - 32px), 688px); box-shadow: 0 12px 30px rgba(0,0,0,.16); }
-.bottom-nav { position: fixed; z-index: 20; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 720px); background: rgba(11,11,15,.97); border-top: 1px solid #25252b; display: grid; grid-template-columns: repeat(4,1fr); padding: 8px 6px max(8px, env(safe-area-inset-bottom)); backdrop-filter: blur(12px); }
+.bottom-nav { position: fixed; z-index: 20; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 720px); background: rgba(11,11,15,.97); border-top: 1px solid #25252b; display: grid; grid-template-columns: repeat(5,1fr); padding: 8px 6px max(8px, env(safe-area-inset-bottom)); backdrop-filter: blur(12px); }
 .nav-item { display: grid; justify-items: center; gap: 4px; padding: 7px 4px; font-size: 11px; color: #a9a3a8; }
 .nav-item strong { font-size: 18px; line-height: 1; font-weight: 500; }
 .nav-item.active { color: var(--brand); font-weight: 800; }
@@ -125,6 +125,7 @@ details[open] > summary::after { transform: rotate(-90deg); }
 .availability-hint { padding: 10px 12px; border-radius: 12px; background: #fff8e5; color: var(--warning); font-size: 12px; font-weight: 750; }
 .availability-hint.available { background: #eaf7ef; color: var(--success); }
 .report-filter { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+.adjustment-preview { background: var(--soft); }
 
 @media (min-width: 560px) {
   .page-heading { grid-template-columns: 1fr auto; align-items: end; }

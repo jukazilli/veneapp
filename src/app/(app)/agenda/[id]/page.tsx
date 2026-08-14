@@ -34,7 +34,7 @@ export default async function AppointmentPage({ params, searchParams }: { params
   const query = await searchParams
   const { supabase, profile } = await requireUser()
   const [{ data: appt }, { data: people = [] }, { data: events = [] }] = await Promise.all([
-    supabase.from('appointments').select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,net_amount,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)').eq('id', id).single(),
+    supabase.from('appointments').select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,net_amount,entry_source,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)').eq('id', id).single(),
     supabase.from('profiles').select('id,organization_id,full_name,email,role,active,must_change_password').eq('active', true).order('full_name'),
     supabase.from('appointment_events').select('id,event_type,from_status,to_status,created_at,actor:profiles!appointment_events_actor_id_fkey(full_name)').eq('appointment_id', id).order('created_at', { ascending: false }).limit(8),
   ])

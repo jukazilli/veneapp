@@ -12,6 +12,13 @@ export function dateTime(value: string) {
   }).format(new Date(value))
 }
 
+export function dateOnly(value: string) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: TIME_ZONE,
+    day: '2-digit', month: '2-digit', year: 'numeric',
+  }).format(new Date(value))
+}
+
 export function time(value: string) {
   return new Intl.DateTimeFormat('pt-BR', {
     timeZone: TIME_ZONE, hour: '2-digit', minute: '2-digit',

@@ -39,6 +39,8 @@ O script valida:
 18. Confirmar os números nos filtros diário, semanal e mensal de Relatórios.
 19. Exportar o relatório em PDF e abrir o arquivo.
 20. Excluir um agendamento como atendente e confirmar sua remoção da agenda compartilhada.
+21. Abrir **Ajustes**, lançar um atendimento já realizado de R$ 120,00 e confirmar a prévia de R$ 30,00 de comissão e R$ 90,00 de líquido.
+22. Confirmar que o ajuste aparece no relatório da data escolhida e, quando lançado para hoje, também no fechamento diário, mas nunca ocupa um horário na agenda.
 
 ## Gate de produção
 

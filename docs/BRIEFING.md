@@ -133,7 +133,7 @@ Princípios:
 - Estados visuais claros e feedback imediato.
 
 Navegação inferior:
-**Agenda · Fechamento · Relatórios · Mais**
+**Agenda · Ajustes · Fechamento · Relatórios · Mais**
 
 CTA principal da agenda:
 **+ Novo agendamento**
@@ -175,6 +175,8 @@ Tabelas do MVP:
 - Primeiro acesso e troca da senha temporária
 - Agenda do dia
 - Novo agendamento
+- Ajustes de atendimentos já realizados
+- Novo ajuste histórico
 - Detalhe/histórico
 - Remarcação
 - Cancelamento/conclusão/falta

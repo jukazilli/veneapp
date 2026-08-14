@@ -14,6 +14,13 @@ function numeric(value: number | string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+export function commissionAmountFor(priceValue: number, mode: 'fixed' | 'percentage', configuredValue: number) {
+  const price = numeric(priceValue)
+  const commissionValue = numeric(configuredValue)
+  const amount = mode === 'percentage' ? price * commissionValue / 100 : commissionValue
+  return Math.round(amount * 100) / 100
+}
+
 export function completedCommissionTotal(rows: CommissionRow[]) {
   return rows.reduce((sum, row) => {
     if (row.status && row.status !== 'completed') return sum

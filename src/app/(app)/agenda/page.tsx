@@ -14,7 +14,8 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
   const { start, end } = dayBounds(date)
 
   const { data = [] } = await supabase.from('appointments')
-    .select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,net_amount,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)')
+    .select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,net_amount,entry_source,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)')
+    .eq('entry_source', 'agenda')
     .gte('starts_at', start)
     .lt('starts_at', end)
     .order('starts_at')

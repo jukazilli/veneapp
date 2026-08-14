@@ -21,8 +21,9 @@ MVP mobile-first para sincronizar agenda, atendimento, faturamento e comissões 
 8. O telefone identifica e cadastra o cliente automaticamente; números repetidos reutilizam o cadastro existente.
 9. Todos os papéis recebem a agenda compartilhada e podem editar, remarcar, concluir, cancelar, marcar falta ou excluir agendamentos.
 10. Mudanças relevantes ficam registradas no histórico.
-11. Fechamento diário e relatórios por dia, semana ou mês calculam faturamento bruto, líquido do atendente (`bruto - comissão`), comissão, pagamentos e saldo acumulado, com exportação em PDF.
-12. Proprietário/admin configura comissão fixa ou percentual e duração padrão.
+11. A tela Ajustes lança atendimentos já realizados em datas anteriores sem ocupar a agenda e aplica a comissão configurada.
+12. Fechamento diário e relatórios por dia, semana ou mês calculam faturamento bruto, líquido do atendente (`bruto - comissão`), comissão, pagamentos e saldo acumulado, com exportação em PDF.
+13. Proprietário/admin configura comissão fixa ou percentual e duração padrão.
 
 ## Rodar localmente
 

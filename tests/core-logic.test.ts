@@ -9,8 +9,8 @@ import {
   shiftLocalDate,
   zonedLocalToIso,
 } from '../src/lib/dates.ts'
-import { money, whatsappUrl } from '../src/lib/format.ts'
-import { completedFinancialTotals, outstandingCommissionBalance } from '../src/lib/finance.ts'
+import { dateOnly, money, whatsappUrl } from '../src/lib/format.ts'
+import { commissionAmountFor, completedFinancialTotals, outstandingCommissionBalance } from '../src/lib/finance.ts'
 import { formatDurationHHMM, normalizeDurationTyping, parseDurationHHMM } from '../src/lib/duration.ts'
 import { findBestAvailableTime } from '../src/lib/availability.ts'
 import { buildAuthActionUrl, renderAuthEmail, type SendEmailHookPayload } from '../src/lib/auth-email.ts'
@@ -148,6 +148,7 @@ test('duração HH:MM converte com segurança para minutos inteiros', () => {
 
 test('formatação monetária e link de WhatsApp', () => {
   assert.match(money(1234.5), /1\.234,50/)
+  assert.equal(dateOnly('2026-08-13T15:00:00.000Z'), '13/08/2026')
   assert.equal(whatsappUrl('(47) 99999-1234'), 'https://wa.me/5547999991234')
   assert.equal(whatsappUrl('+55 47 99999-1234'), 'https://wa.me/5547999991234')
   assert.equal(whatsappUrl(''), null)
@@ -174,6 +175,12 @@ test('financeiro mantém bruto, comissão e líquido do atendente sincronizados'
     commission: 30,
     attendantNet: 90,
   })
+})
+
+test('ajuste usa a comissão configurada antes de calcular o líquido do atendente', () => {
+  assert.equal(commissionAmountFor(120, 'fixed', 30), 30)
+  assert.equal(commissionAmountFor(120, 'percentage', 25), 30)
+  assert.equal(120 - commissionAmountFor(120, 'fixed', 30), 90)
 })
 
 test('link de autenticação mantém apenas um próximo destino interno', () => {

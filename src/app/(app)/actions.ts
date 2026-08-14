@@ -3,8 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/session'
-import { zonedLocalToIso } from '@/lib/dates'
+import { localDateString, zonedLocalToIso } from '@/lib/dates'
 import { parseDurationHHMM } from '@/lib/duration'
+import { commissionAmountFor } from '@/lib/finance'
 import { canManageAppointments, isOrganizationManager, type AppointmentStatus, type CommissionMode, type ProfileRole } from '@/lib/types'
 
 export type ActionState = { error?: string; success?: string }
@@ -17,6 +18,7 @@ function humanizeDbError(message: string) {
   if (message.includes('horário que já passou')) return 'Escolha um horário futuro.'
   if (message.includes('Telefone do cliente inválido')) return 'Informe um telefone com DDD ou deixe o campo em branco.'
   if (message.includes('appointments_commission_not_above_price')) return 'A comissão configurada não pode ser maior que o valor.'
+  if (message.includes('data do ajuste não pode estar no futuro')) return 'Escolha hoje ou uma data anterior.'
   if (message.includes('Agente inválido')) return 'O agente selecionado está inativo ou não pertence à operação.'
   if (message.includes('Atendente inválido')) return 'O atendente selecionado está inativo ou não pertence à operação.'
   if (message.includes('administrador ativo')) return 'A operação precisa manter pelo menos um administrador ativo.'
@@ -71,6 +73,61 @@ export async function createAppointmentAction(_: ActionState, formData: FormData
 
   revalidatePath('/agenda')
   redirect(`/agenda?date=${date}`)
+}
+
+export async function createAdjustmentAction(_: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase, userId, profile } = await requireUser()
+  if (!canManageAppointments(profile.role)) return { error: 'Seu perfil não pode criar ajustes.' }
+
+  const clientName = String(formData.get('client_name') || '').trim() || 'Cliente não informado'
+  const date = String(formData.get('date') || '')
+  const attendantId = String(formData.get('attendant_id') || '')
+  const agentId = String(formData.get('agent_id') || '')
+  const price = decimal(formData.get('price'))
+  const parsedDate = new Date(`${date}T12:00:00.000Z`)
+  const today = localDateString()
+
+  if (!date || !attendantId || !agentId) return { error: 'Preencha data, agente e atendente.' }
+  if (Number.isNaN(parsedDate.getTime()) || localDateString(parsedDate, 'UTC') !== date || date > today) {
+    return { error: 'Escolha hoje ou uma data anterior.' }
+  }
+  if (!Number.isFinite(price) || price <= 0) return { error: 'Informe um valor maior que zero.' }
+
+  const { data: settings, error: settingsError } = await supabase
+    .from('settings')
+    .select('timezone,default_duration_min,commission_mode,commission_value')
+    .eq('organization_id', profile.organization_id)
+    .single()
+  if (settingsError || !settings) return { error: 'Não foi possível carregar as configurações da organização.' }
+
+  const commission = commissionAmountFor(price, settings.commission_mode as CommissionMode, Number(settings.commission_value))
+  if (commission > price) return { error: 'A comissão configurada não pode ser maior que o valor.' }
+
+  const startsAt = date === today
+    ? new Date().toISOString()
+    : zonedLocalToIso(date, '12:00', settings.timezone || 'America/Sao_Paulo')
+
+  const { error } = await supabase.from('appointments').insert({
+    organization_id: profile.organization_id,
+    client_name: clientName,
+    client_phone: String(formData.get('client_phone') || '').trim() || null,
+    starts_at: startsAt,
+    duration_min: settings.default_duration_min || 60,
+    price,
+    status: 'completed',
+    entry_source: 'adjustment',
+    agent_id: agentId,
+    attendant_id: attendantId,
+    notes: 'Ajuste de atendimento já realizado.',
+    created_by: userId,
+  })
+
+  if (error) return { error: humanizeDbError(error.message) }
+
+  revalidatePath('/ajustes')
+  revalidatePath('/fechamento')
+  revalidatePath('/relatorios')
+  redirect('/ajustes?created=1')
 }
 
 export async function updateAppointmentStatusAction(_: ActionState, formData: FormData): Promise<ActionState> {

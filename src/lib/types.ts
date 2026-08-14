@@ -1,5 +1,6 @@
 export type ProfileRole = 'owner' | 'admin' | 'agent' | 'attendant'
 export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
+export type AppointmentEntrySource = 'agenda' | 'adjustment'
 export type CommissionMode = 'fixed' | 'percentage'
 
 export type Profile = {
@@ -30,6 +31,7 @@ export type Appointment = {
   duration_min: number
   price: number
   net_amount: number
+  entry_source: AppointmentEntrySource
   status: AppointmentStatus
   commission_amount: number
   notes: string | null
