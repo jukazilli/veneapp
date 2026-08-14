@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { requireUser } from '@/lib/session'
+import { canManageAppointments } from '@/lib/types'
 import { dayBounds, localDateString, shiftLocalDate } from '@/lib/dates'
 import { RealtimeAgenda } from '@/components/realtime-agenda'
 import { AgendaDateNav } from '@/components/agenda-date-nav'
@@ -18,7 +19,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
     .lt('starts_at', end)
     .order('starts_at')
 
-  const canCreate = ['admin', 'agent'].includes(profile.role)
+  const canCreate = canManageAppointments(profile.role)
   return <main>
     <div className="page-heading">
       <div><div className="eyebrow">Agenda compartilhada</div><h1>{date === today ? 'Hoje' : 'Agenda'}</h1></div>

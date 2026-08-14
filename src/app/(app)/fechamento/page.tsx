@@ -64,10 +64,10 @@ export default async function ClosingPage() {
   const outstanding = outstandingCommissionBalance(balanceAppointments || [], balancePayments || [])
   const cancelled = (appointments || []).filter(a => a.status === 'cancelled').length
   const noShows = (appointments || []).filter(a => a.status === 'no_show').length
-  const agents = (people || []).filter(p => p.role === 'agent' || p.role === 'admin') as Profile[]
-  const canPay = ['admin', 'attendant'].includes(profile.role)
+  const agents = (people || []).filter(p => p.role === 'agent' || p.role === 'admin' || p.role === 'owner') as Profile[]
+  const canPay = ['owner', 'admin', 'attendant'].includes(profile.role)
 
-  const scope = profile.role === 'admin' ? 'Operação inteira' : profile.role === 'agent' ? 'Seus agendamentos' : 'Seus atendimentos'
+  const scope = profile.role === 'owner' || profile.role === 'admin' ? 'Operação inteira' : profile.role === 'agent' ? 'Seus agendamentos' : 'Seus atendimentos'
   const balanceLabel = profile.role === 'agent' ? 'Saldo a receber' : 'Saldo a repassar'
 
   return <main className="stack">

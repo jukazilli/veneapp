@@ -9,7 +9,7 @@ export async function requireUser() {
   if (!userId) redirect('/login')
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id,organization_id,full_name,email,role,active')
+    .select('id,organization_id,full_name,email,role,active,must_change_password')
     .eq('id', userId)
     .single()
   if (error || !profile) redirect('/login')

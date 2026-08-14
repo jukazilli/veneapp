@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { Webhook } from 'standardwebhooks'
 import { renderAuthEmail, type SendEmailHookPayload } from '@/lib/auth-email'
+import { sendTransactionalEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
 
 function getRequiredEnvironment() {
-  const apiKey = process.env.RESEND_API_KEY || process.env.RESEND_KEY
   const hookSecret = process.env.SEND_EMAIL_HOOK_SECRET
-  const from = process.env.RESEND_FROM_EMAIL
 
-  if (!apiKey || !hookSecret || !from) throw new Error('Configuração de e-mail incompleta.')
-  return { apiKey, hookSecret: hookSecret.replace(/^v1,whsec_/, ''), from }
+  if (!hookSecret) throw new Error('Configuração do hook de e-mail incompleta.')
+  return { hookSecret: hookSecret.replace(/^v1,whsec_/, '') }
 }
 
 export async function POST(request: Request) {
@@ -52,15 +50,13 @@ export async function POST(request: Request) {
   try {
     const email = renderAuthEmail(payload)
     const webhookId = request.headers.get('webhook-id')
-    const { error } = await new Resend(environment.apiKey).emails.send({
-      from: environment.from,
-      to: [payload.user.email],
+    await sendTransactionalEmail({
+      to: payload.user.email,
       subject: email.subject,
       html: email.html,
       text: email.text,
-    }, webhookId ? { idempotencyKey: `supabase-auth-${webhookId}` } : undefined)
-
-    if (error) throw new Error('O provedor recusou o envio.')
+      idempotencyKey: webhookId ? `supabase-auth-${webhookId}` : undefined,
+    })
     return NextResponse.json({})
   } catch {
     console.error('Resend auth email delivery failed.')

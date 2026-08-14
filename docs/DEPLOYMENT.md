@@ -6,7 +6,7 @@ O deploy só acontece depois que todos os gates anteriores estiverem verdes. Uma
 - [x] Nome oficial: Veneapp
 - [x] UI mobile-first
 - [x] Paleta rosa + preto
-- [x] Papéis: admin, agente, atendente
+- [x] Papéis: proprietário, admin, agente, atendente
 - [x] Comissão fixa/percentual
 - [x] Sem cadastro de serviços
 
@@ -15,9 +15,11 @@ O deploy só acontece depois que todos os gates anteriores estiverem verdes. Uma
 - [x] RLS em tabelas expostas
 - [x] Bloqueio de conflito de horário no banco
 - [x] Snapshot de comissão
-- [x] Proteção do último administrador
+- [x] Proprietário único e protegido por organização
+- [x] Tenant e papel de convite validados a partir de `app_metadata` do servidor
 - [x] Realtime nas entidades operacionais
-- [x] Security Advisor sem alertas
+- [x] Sem novo alerta de RLS ou função pública no Security Advisor
+- [ ] Ativar proteção contra senhas vazadas no Supabase Auth
 
 ## Gate 2 — Auth e proteção contra abuso
 - [x] Login com e-mail/senha
@@ -64,16 +66,18 @@ Critério: **zero erros**. Warnings relevantes devem ser revisados antes de segu
 ## Gate 5 — Smoke test local
 Com o app em `npm run dev`, validar em viewport mobile:
 
-### Conta/admin
+### Conta/proprietário
 - [ ] Criar primeira conta e receber a confirmação pelo Resend
 - [ ] Confirmar o e-mail e entrar
 - [ ] Solicitar e concluir a redefinição de senha
-- [ ] Primeiro usuário ativo como administrador
+- [ ] Conta ativa como proprietária de uma nova organização
+- [ ] Onboarding solicita nome da organização e primeiro convite
 
 ### Equipe
-- [ ] Criar segunda conta
-- [ ] Segunda conta fica pendente
-- [ ] Admin ativa como agente/atendente
+- [ ] Convidar segunda pessoa como admin/agente/atendente
+- [ ] Receber credenciais temporárias por e-mail
+- [ ] Abrir compartilhamento opcional pelo WhatsApp
+- [ ] Entrar com a senha temporária e ser obrigado a substituí-la
 
 ### Fluxo operacional
 - [ ] Agente cria agendamento
@@ -91,6 +95,7 @@ Somente após o Gate 5:
 - [x] Usar o projeto Vercel `feather-tecnologias/veneapp-9sff`, conectado ao GitHub
 - [ ] Configurar `NEXT_PUBLIC_SUPABASE_URL`
 - [ ] Configurar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- [ ] Configurar `SUPABASE_SERVICE_ROLE_KEY` somente no servidor
 - [ ] Configurar `ANTI_SPAM_SECRET`
 - [ ] Configurar `NEXT_PUBLIC_SITE_URL`
 - [ ] Configurar `RESEND_API_KEY` (ou `RESEND_KEY`)

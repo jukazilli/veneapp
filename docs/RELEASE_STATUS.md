@@ -11,6 +11,14 @@
 - O remetente previsto é `Veneapp <acesso@soberania.tech>`, após verificação de `soberania.tech` no Resend.
 - A interface usa Nunito, empacotada pelo `next/font`.
 
+## Incremento de tenant e onboarding
+
+- Cada cadastro público cria uma organização isolada e um proprietário ativo.
+- O proprietário conclui o onboarding convidando a primeira pessoa.
+- Convites permitem escolher administrador, agente ou atendente e definir senha temporária.
+- O convite é enviado diretamente pelo Resend e pode ser compartilhado pelo WhatsApp.
+- A senha temporária precisa ser substituída no primeiro acesso.
+
 ## Projeto de deploy
 
 - Repositório: `jukazilli/veneapp`.
@@ -27,10 +35,20 @@
 - Browser mobile: `/login`, `/cadastro` e `/esqueci-senha` com HTTP 200, Nunito efetiva, sem erros de console e sem overlay do framework.
 - O projeto Supabase `veneapp` (`ycgmzgxvksmsaeelymsu`) está `ACTIVE_HEALTHY`.
 
+## Validação do onboarding em 13/08/2026
+
+- Preflight: 0 falhas e 0 avisos.
+- Testes de lógica: 12/12, incluindo papel delegável, senha temporária e WhatsApp.
+- TypeScript, ESLint e build de produção: aprovados.
+- Banco remoto: duas organizações, dois proprietários ativos e exatamente um proprietário por tenant.
+- Migrations de owner, onboarding, convite e endurecimento do primeiro acesso: aplicadas.
+- Security Advisor: nenhum alerta novo de RLS ou função pública; proteção contra senhas vazadas ainda precisa ser ativada no Auth.
+
 ## Configuração obrigatória na Vercel
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (somente servidor)
 - `ANTI_SPAM_SECRET`
 - `NEXT_PUBLIC_SITE_URL`
 - `RESEND_API_KEY` ou `RESEND_KEY`

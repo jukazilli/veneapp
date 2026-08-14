@@ -58,7 +58,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const cancellations = (appointments || []).filter(a => a.status === 'cancelled').length
   const noShows = (appointments || []).filter(a => a.status === 'no_show').length
   const finalDay = shiftLocalDate(endLocal, -1)
-  const scope = profile.role === 'admin' ? 'Operação inteira' : profile.role === 'agent' ? 'Seus agendamentos' : 'Seus atendimentos'
+  const scope = profile.role === 'owner' || profile.role === 'admin' ? 'Operação inteira' : profile.role === 'agent' ? 'Seus agendamentos' : 'Seus atendimentos'
   const balanceLabel = profile.role === 'agent' ? 'A receber' : 'A repassar'
 
   return <main className="stack">

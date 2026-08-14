@@ -16,9 +16,14 @@ A agenda muda rápido. Clientes cancelam em cima da hora, novos encaixes surgem 
 O Veneapp deve reduzir passos, não adicionar burocracia. O WhatsApp continua sendo o canal de negociação com o cliente; o Veneapp assume a coordenação interna assim que horário e preço foram combinados.
 
 ## 4. Perfis
+### Proprietário
+- É quem cria a conta e a organização.
+- Conclui o onboarding convidando a primeira pessoa.
+- Possui todas as permissões administrativas e não pode ser removido ou rebaixado.
+
 ### Administrador
 - Configura comissão e duração padrão.
-- Ativa contas pendentes e define papéis.
+- Convida pessoas e define papéis.
 - Pode administrar agenda.
 - Enxerga fechamento e relatórios da operação.
 
@@ -100,7 +105,9 @@ O MVP exige confirmação de e-mail. O Supabase Auth gera e valida os tokens, e 
 
 O mesmo canal entrega a confirmação de cadastro e a recuperação de senha. Links são trocados por sessão no callback PKCE do aplicativo e não expõem tokens sensíveis em logs.
 
-O primeiro usuário do banco vira administrador. Os usuários seguintes entram inativos e aguardam aprovação do administrador, evitando que uma conta recém-criada acesse dados operacionais automaticamente.
+Cada cadastro público cria uma organização isolada e torna a pessoa seu `owner` ativo. Após confirmar o e-mail, ela informa o nome da organização e convida a primeira pessoa como administrador, agente ou atendente.
+
+Contas da equipe não são criadas pelo cadastro público dentro de um tenant existente. Proprietário ou administrador provisiona o convite no servidor, define uma senha temporária e escolhe o papel. As credenciais seguem por Resend, podem ser compartilhadas por WhatsApp e a senha precisa ser trocada no primeiro acesso.
 
 A verificação de objetos é uma barreira leve contra spam. Para uma abertura pública em escala, a evolução recomendada é ativar CAPTCHA/Turnstile nativo do Supabase Auth além dos rate limits.
 
@@ -152,7 +159,8 @@ Tabelas do MVP:
 - Criar conta
 - Esqueci minha senha
 - Redefinir senha
-- Acesso pendente
+- Onboarding da organização
+- Primeiro acesso e troca da senha temporária
 - Agenda do dia
 - Novo agendamento
 - Detalhe/histórico

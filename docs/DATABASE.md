@@ -13,11 +13,16 @@ Região: `sa-east-1`
 6. `20260813005338_protect_last_active_admin`
 7. `20260813005801_preserve_commission_snapshot_and_expand_history`
 8. `20260813005821_allow_admin_as_commission_agent`
+9. `20260813024932_allow_attendant_controlled_status_updates`
+10. `20260813025010_merge_appointment_update_policies`
+11. `20260813180000_add_owner_profile_role`
+12. `20260813180001_create_owner_onboarding_and_invitations`
+13. `20260813180002_harden_first_access`
 
 ## Estrutura
 
-- `organizations`: operação/tenant do MVP
-- `profiles`: usuários e papéis (`admin`, `agent`, `attendant`)
+- `organizations`: operação/tenant e conclusão do onboarding
+- `profiles`: usuários, convite, troca obrigatória de senha e papéis (`owner`, `admin`, `agent`, `attendant`)
 - `settings`: comissão, duração padrão e timezone
 - `appointments`: agenda, preço, status e snapshot imutável da regra de comissão
 - `appointment_events`: trilha de eventos da agenda
@@ -29,13 +34,15 @@ Região: `sa-east-1`
 - `ends_at` é calculado automaticamente a partir de `starts_at + duration_min`.
 - A regra de comissão é capturada no momento da criação e permanece no agendamento.
 - Mudanças futuras na configuração de comissão não alteram agendamentos existentes.
-- O último administrador ativo não pode ser desativado ou rebaixado.
-- Agentes e administradores podem ser selecionados como responsáveis pela comissão.
+- Cada cadastro público cria um tenant próprio e um `owner` ativo.
+- Convites entram no tenant somente por metadados de aplicação criados pelo servidor.
+- Cada organização tem um único proprietário, que não pode ser desativado, rebaixado ou movido.
+- Proprietários, agentes e administradores podem ser selecionados como responsáveis pela comissão.
 - Alterações de horário, status, duração, atendente e valor entram no histórico.
 
 ## Segurança
 
-Todas as tabelas expostas usam Row Level Security. O advisor de segurança do Supabase está sem alertas após a configuração atual.
+Todas as tabelas operacionais expostas usam Row Level Security. O fluxo de primeiro acesso não expõe função `SECURITY DEFINER` na API pública. Permanece a recomendação do Auth Advisor para ativar proteção contra senhas vazadas.
 
 ## Realtime
 

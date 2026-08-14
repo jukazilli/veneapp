@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireUser } from '@/lib/session'
+import { canManageAppointments } from '@/lib/types'
 import { dateTime, money, whatsappUrl } from '@/lib/format'
 import { localDateString } from '@/lib/dates'
 import { RescheduleForm } from '@/components/reschedule-form'
@@ -37,7 +38,7 @@ export default async function AppointmentPage({ params }: { params: Promise<{ id
   ])
 
   if (!appt) notFound()
-  const canManage = ['admin', 'agent'].includes(profile.role)
+  const canManage = canManageAppointments(profile.role)
   const canExecute = canManage || (profile.role === 'attendant' && appt.attendant_id === profile.id)
   const attendants = (people || []) as Profile[]
   const whatsapp = appt.client_phone ? whatsappUrl(appt.client_phone) : null

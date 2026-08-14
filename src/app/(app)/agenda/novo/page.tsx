@@ -18,7 +18,7 @@ export default async function NewAppointmentPage({ searchParams }: { searchParam
   ])
 
   const typed = (people || []) as Profile[]
-  const agents = typed.filter(p => p.role === 'agent' || p.role === 'admin')
+  const agents = typed.filter(p => p.role === 'agent' || p.role === 'admin' || p.role === 'owner')
   const attendants = typed.filter(p => p.role === 'attendant')
   const defaultAgentId = agents.some(agent => agent.id === profile.id) ? profile.id : agents[0]?.id || ''
 

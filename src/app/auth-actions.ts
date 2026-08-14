@@ -43,7 +43,7 @@ export async function signupAction(_: AuthActionState, formData: FormData): Prom
     password,
     options: {
       data: { full_name: fullName },
-      emailRedirectTo: `${origin}/auth/confirm?next=/agenda`,
+      emailRedirectTo: `${origin}/auth/confirm?next=/onboarding`,
     },
   })
 

@@ -3,11 +3,12 @@ import { LoginForm } from '@/components/auth-form'
 const NOTICES: Record<string, string> = {
   updated: 'Senha atualizada. Entre com sua nova senha.',
   invalid: 'Este link expirou ou já foi usado. Solicite um novo link.',
+  ready: 'Convite aceito. Entre com a senha temporária recebida.',
 }
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ password?: string; auth?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ password?: string; auth?: string; invite?: string }> }) {
   const params = await searchParams
-  const notice = params.password === 'updated' ? NOTICES.updated : params.auth === 'invalid' ? NOTICES.invalid : undefined
+  const notice = params.password === 'updated' ? NOTICES.updated : params.auth === 'invalid' ? NOTICES.invalid : params.invite === 'ready' ? NOTICES.ready : undefined
   const noticeKind = params.auth === 'invalid' ? 'error' : 'success'
 
   return <main className="auth-shell"><div className="auth-panel">

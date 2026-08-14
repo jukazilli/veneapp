@@ -22,6 +22,8 @@ main { width: 100%; }
 .shell { width: min(100%, 720px); margin: 0 auto; min-height: 100vh; padding: 18px 16px 92px; }
 .auth-shell { width: 100%; min-height: 100vh; display: grid; align-content: center; padding: 28px 18px; background: var(--ink); color: #fff; }
 .auth-panel { width: min(100%, 460px); margin: 0 auto; }
+.setup-shell { width: 100%; min-height: 100vh; padding: 28px 18px 48px; }
+.setup-panel { width: min(100%, 560px); margin: 0 auto; }
 .brand { font-weight: 900; letter-spacing: -0.055em; font-size: 30px; margin-bottom: 8px; }
 .brand span { color: var(--brand); }
 .eyebrow { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
@@ -39,6 +41,8 @@ p { line-height: 1.5; }
 .field label { font-size: 13px; font-weight: 700; }
 .field-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .inline-link { color: var(--brand-strong); font-size: 12px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
+.inline-action, .text-button { appearance: none; border: 0; padding: 0; background: transparent; color: var(--brand-strong); font-size: 12px; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.text-button { width: 100%; color: var(--muted); text-align: center; }
 .input, .select, .textarea { width: 100%; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: var(--text); padding: 13px 14px; min-height: 48px; outline: none; }
 .input:focus, .select:focus, .textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(255,79,163,.14); }
 .textarea { min-height: 88px; resize: vertical; }
@@ -114,6 +118,8 @@ details[open] > summary::after { transform: rotate(-90deg); }
 .history-item:not(:last-child)::before { content: ''; position: absolute; left: 4px; top: 14px; bottom: -4px; width: 1px; background: var(--line); }
 .history-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 4px; background: var(--brand); position: relative; z-index: 1; }
 .member-form { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.credential-card { display: grid; gap: 6px; padding: 14px; border: 1px dashed var(--brand); border-radius: 14px; background: var(--soft); overflow-wrap: anywhere; }
+.credential-card strong { font-size: 18px; letter-spacing: .03em; }
 
 @media (min-width: 560px) {
   .page-heading { grid-template-columns: 1fr auto; align-items: end; }

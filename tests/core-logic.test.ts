@@ -12,6 +12,7 @@ import {
 import { money, whatsappUrl } from '../src/lib/format.ts'
 import { outstandingCommissionBalance } from '../src/lib/finance.ts'
 import { buildAuthActionUrl, renderAuthEmail, type SendEmailHookPayload } from '../src/lib/auth-email.ts'
+import { buildWhatsAppInvitationUrl, isAssignableRole, isStrongTemporaryPassword } from '../src/lib/invitations.ts'
 
 process.env.ANTI_SPAM_SECRET = 'veneapp-test-secret-with-more-than-24-characters'
 
@@ -145,4 +146,31 @@ test('template do Resend escapa metadados do usuário', () => {
   assert.doesNotMatch(email.html, /<script>/)
   assert.match(email.html, /&lt;script&gt;/)
   assert.match(email.subject, /Confirme seu e-mail/)
+})
+
+test('convite aceita somente papéis delegáveis e senha temporária forte', () => {
+  assert.equal(isAssignableRole('owner'), false)
+  assert.equal(isAssignableRole('admin'), true)
+  assert.equal(isAssignableRole('agent'), true)
+  assert.equal(isAssignableRole('attendant'), true)
+  assert.equal(isStrongTemporaryPassword('Senha-Fraca'), false)
+  assert.equal(isStrongTemporaryPassword('Forte-2026-Veneapp'), true)
+})
+
+test('convite monta WhatsApp com credenciais e troca obrigatória', () => {
+  const url = buildWhatsAppInvitationUrl({
+    phone: '(47) 99999-1234',
+    fullName: 'Pessoa Teste',
+    organizationName: 'Clínica Teste',
+    role: 'attendant',
+    email: 'pessoa@example.com',
+    temporaryPassword: 'Forte-2026-Veneapp',
+    loginUrl: 'https://veneapp-9sff.vercel.app/login?invite=ready',
+  })
+  assert.ok(url)
+  const parsed = new URL(url)
+  assert.equal(parsed.hostname, 'wa.me')
+  assert.equal(parsed.pathname, '/5547999991234')
+  assert.match(parsed.searchParams.get('text') || '', /Senha temporária: Forte-2026-Veneapp/)
+  assert.match(parsed.searchParams.get('text') || '', /crie uma nova senha/)
 })

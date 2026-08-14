@@ -1,4 +1,4 @@
-export type ProfileRole = 'admin' | 'agent' | 'attendant'
+export type ProfileRole = 'owner' | 'admin' | 'agent' | 'attendant'
 export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled' | 'no_show'
 export type CommissionMode = 'fixed' | 'percentage'
 
@@ -9,6 +9,15 @@ export type Profile = {
   email: string | null
   role: ProfileRole
   active: boolean
+  must_change_password: boolean
+}
+
+export function isOrganizationManager(role: ProfileRole) {
+  return role === 'owner' || role === 'admin'
+}
+
+export function canManageAppointments(role: ProfileRole) {
+  return role === 'owner' || role === 'admin' || role === 'agent'
 }
 
 export type Appointment = {

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/session'
 import { zonedLocalToIso } from '@/lib/dates'
-import type { AppointmentStatus, CommissionMode, ProfileRole } from '@/lib/types'
+import { canManageAppointments, isOrganizationManager, type AppointmentStatus, type CommissionMode, type ProfileRole } from '@/lib/types'
 
 export type ActionState = { error?: string; success?: string }
 
@@ -28,7 +28,7 @@ function humanizeDbError(message: string) {
 
 export async function createAppointmentAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const { supabase, userId, profile } = await requireUser()
-  if (!['admin', 'agent'].includes(profile.role)) return { error: 'Seu perfil não pode criar agendamentos.' }
+  if (!canManageAppointments(profile.role)) return { error: 'Seu perfil não pode criar agendamentos.' }
 
   const clientName = String(formData.get('client_name') || '').trim()
   const date = String(formData.get('date') || '')
@@ -79,7 +79,7 @@ export async function updateAppointmentStatusAction(_: ActionState, formData: Fo
   const status = String(formData.get('status') || '') as AppointmentStatus
   if (!id || !['scheduled', 'completed', 'cancelled', 'no_show'].includes(status)) return { error: 'Ação inválida.' }
 
-  const isManager = ['admin', 'agent'].includes(profile.role)
+  const isManager = canManageAppointments(profile.role)
   const isAttendantAction = profile.role === 'attendant' && ['completed', 'no_show'].includes(status)
   if (!isManager && !isAttendantAction) return { error: 'Seu perfil não pode executar essa ação.' }
 
@@ -104,7 +104,7 @@ export async function updateAppointmentStatusAction(_: ActionState, formData: Fo
 
 export async function rescheduleAppointmentAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const { supabase, profile } = await requireUser()
-  if (!['admin', 'agent'].includes(profile.role)) return { error: 'Sem permissão.' }
+  if (!canManageAppointments(profile.role)) return { error: 'Sem permissão.' }
 
   const id = String(formData.get('id') || '')
   const date = String(formData.get('date') || '')
@@ -142,7 +142,7 @@ export async function rescheduleAppointmentAction(_: ActionState, formData: Form
 
 export async function recordPaymentAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const { supabase, userId, profile } = await requireUser()
-  if (!['admin', 'attendant'].includes(profile.role)) return { error: 'Seu perfil não pode registrar pagamentos.' }
+  if (!['owner', 'admin', 'attendant'].includes(profile.role)) return { error: 'Seu perfil não pode registrar pagamentos.' }
 
   const agentId = String(formData.get('agent_id') || '')
   const amount = decimal(formData.get('amount'))
@@ -166,7 +166,7 @@ export async function recordPaymentAction(_: ActionState, formData: FormData): P
 
 export async function updateSettingsAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const { supabase, profile } = await requireUser()
-  if (profile.role !== 'admin') return { error: 'Somente o administrador altera configurações.' }
+  if (!isOrganizationManager(profile.role)) return { error: 'Somente proprietários e administradores alteram configurações.' }
 
   const mode = String(formData.get('commission_mode') || 'fixed') as CommissionMode
   const value = decimal(formData.get('commission_value'))
@@ -190,12 +190,15 @@ export async function updateSettingsAction(_: ActionState, formData: FormData): 
 
 export async function updateMemberAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const { supabase, profile } = await requireUser()
-  if (profile.role !== 'admin') return { error: 'Somente administradores podem alterar a equipe.' }
+  if (!isOrganizationManager(profile.role)) return { error: 'Somente proprietários e administradores podem alterar a equipe.' }
 
   const id = String(formData.get('id') || '')
   const role = String(formData.get('role') || '') as ProfileRole
   const active = String(formData.get('active') || '') === 'true'
   if (!id || !['admin', 'agent', 'attendant'].includes(role)) return { error: 'Dados inválidos.' }
+
+  const { data: target } = await supabase.from('profiles').select('role').eq('id', id).single()
+  if (!target || target.role === 'owner') return { error: 'O proprietário da organização não pode ter seu acesso alterado.' }
 
   const { error } = await supabase.from('profiles').update({ role, active }).eq('id', id)
   if (error) return { error: humanizeDbError(error.message) }
