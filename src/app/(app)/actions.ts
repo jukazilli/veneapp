@@ -17,6 +17,8 @@ function validDuration(value: number) {
 }
 
 function humanizeDbError(message: string) {
+  if (message.includes('horário que já passou')) return 'Escolha um horário futuro.'
+  if (message.includes('Telefone do cliente inválido')) return 'Informe um telefone com DDD ou deixe o campo em branco.'
   if (message.includes('Agente inválido')) return 'O agente selecionado está inativo ou não pertence à operação.'
   if (message.includes('Atendente inválido')) return 'O atendente selecionado está inativo ou não pertence à operação.'
   if (message.includes('administrador ativo')) return 'A operação precisa manter pelo menos um administrador ativo.'
@@ -49,6 +51,7 @@ export async function createAppointmentAction(_: ActionState, formData: FormData
     .single()
 
   const startsAt = zonedLocalToIso(date, time, settings?.timezone || 'America/Sao_Paulo')
+  if (new Date(startsAt).getTime() <= Date.now()) return { error: 'Escolha um horário futuro.' }
   const { error } = await supabase.from('appointments').insert({
     organization_id: profile.organization_id,
     client_name: clientName,
@@ -79,13 +82,9 @@ export async function updateAppointmentStatusAction(_: ActionState, formData: Fo
   const status = String(formData.get('status') || '') as AppointmentStatus
   if (!id || !['scheduled', 'completed', 'cancelled', 'no_show'].includes(status)) return { error: 'Ação inválida.' }
 
-  const isManager = canManageAppointments(profile.role)
-  const isAttendantAction = profile.role === 'attendant' && ['completed', 'no_show'].includes(status)
-  if (!isManager && !isAttendantAction) return { error: 'Seu perfil não pode executar essa ação.' }
+  if (!canManageAppointments(profile.role)) return { error: 'Seu perfil não pode executar essa ação.' }
 
-  let updateQuery = supabase.from('appointments').update({ status }).eq('id', id)
-  if (profile.role === 'attendant') updateQuery = updateQuery.eq('attendant_id', profile.id)
-  const { error } = await updateQuery
+  const { error } = await supabase.from('appointments').update({ status }).eq('id', id)
   if (error) return { error: humanizeDbError(error.message) }
 
   revalidatePath('/agenda')
@@ -110,10 +109,12 @@ export async function rescheduleAppointmentAction(_: ActionState, formData: Form
   const date = String(formData.get('date') || '')
   const time = String(formData.get('time') || '')
   const attendantId = String(formData.get('attendant_id') || '')
+  const agentId = String(formData.get('agent_id') || '')
+  const clientName = String(formData.get('client_name') || '').trim()
   const duration = Number(formData.get('duration_min') || 60)
   const price = decimal(formData.get('price'))
 
-  if (!id || !date || !time || !attendantId) return { error: 'Preencha data, hora e atendente.' }
+  if (!id || !date || !time || !attendantId || !agentId || !clientName) return { error: 'Preencha cliente, data, hora, agente e atendente.' }
   if (!Number.isFinite(price) || price < 0) return { error: 'Informe um valor válido.' }
   if (!validDuration(duration)) return { error: 'Informe uma duração entre 5 e 720 minutos.' }
 
@@ -124,11 +125,16 @@ export async function rescheduleAppointmentAction(_: ActionState, formData: Form
     .single()
 
   const startsAt = zonedLocalToIso(date, time, settings?.timezone || 'America/Sao_Paulo')
+  if (new Date(startsAt).getTime() <= Date.now()) return { error: 'Escolha um horário futuro.' }
   const { error } = await supabase.from('appointments').update({
+    client_name: clientName,
+    client_phone: String(formData.get('client_phone') || '').trim() || null,
     starts_at: startsAt,
     duration_min: duration,
     attendant_id: attendantId,
+    agent_id: agentId,
     price,
+    notes: String(formData.get('notes') || '').trim() || null,
     status: 'scheduled',
   }).eq('id', id)
 
@@ -138,6 +144,22 @@ export async function rescheduleAppointmentAction(_: ActionState, formData: Form
   revalidatePath('/agenda')
   revalidatePath(`/agenda/${id}`)
   return { success: 'Agendamento atualizado e sincronizado.' }
+}
+
+export async function deleteAppointmentAction(formData: FormData) {
+  const { supabase, profile } = await requireUser()
+  if (!canManageAppointments(profile.role)) redirect('/agenda')
+
+  const id = String(formData.get('id') || '')
+  const date = String(formData.get('date') || '')
+  if (!id) redirect('/agenda')
+
+  const { error } = await supabase.from('appointments').delete().eq('id', id)
+  if (error) redirect(`/agenda/${id}?error=delete`)
+
+  revalidatePath('/agenda')
+  revalidatePath('/relatorios')
+  redirect(`/agenda${/^\d{4}-\d{2}-\d{2}$/.test(date) ? `?date=${date}` : ''}`)
 }
 
 export async function recordPaymentAction(_: ActionState, formData: FormData): Promise<ActionState> {

@@ -34,9 +34,10 @@ O Veneapp deve reduzir passos, não adicionar burocracia. O WhatsApp continua se
 - Acompanha a própria comissão.
 
 ### Atendente
-- Visualiza os atendimentos destinados a ele.
+- Visualiza a agenda compartilhada da organização.
 - Recebe alterações da agenda em tempo real.
 - Acompanha seus atendimentos e produção.
+- Pode criar, editar, remarcar, cancelar, concluir ou excluir agendamentos.
 - Pode registrar pagamentos realizados ao agente.
 
 ## 5. Jornada principal
@@ -54,6 +55,7 @@ O Veneapp deve reduzir passos, não adicionar burocracia. O WhatsApp continua se
 - Cada atendimento recebe preço livre no momento do agendamento.
 - Duração padrão inicial: 60 minutos, editável.
 - Observações são livres por atendimento.
+- O telefone é opcional e, quando informado, identifica e cadastra o cliente automaticamente.
 
 ## 7. Comissão
 Dois modos configuráveis:
@@ -167,7 +169,7 @@ Tabelas do MVP:
 - Remarcação
 - Cancelamento/conclusão/falta
 - Fechamento diário
-- Relatório semanal/mensal
+- Relatório diário/semanal/mensal com exportação em PDF
 - Registro de pagamento
 - Equipe
 - Configurações
@@ -175,7 +177,7 @@ Tabelas do MVP:
 ## 16. Fora do MVP inicial
 - Automação do WhatsApp
 - Push notification nativa
-- Cadastro completo de clientes
+- Gestão avançada de clientes além do cadastro automático por telefone
 - Integração bancária
 - Multiempresa por usuário
 - Regras distintas de comissão por agente

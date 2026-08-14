@@ -17,11 +17,12 @@ export function isOrganizationManager(role: ProfileRole) {
 }
 
 export function canManageAppointments(role: ProfileRole) {
-  return role === 'owner' || role === 'admin' || role === 'agent'
+  return ['owner', 'admin', 'agent', 'attendant'].includes(role)
 }
 
 export type Appointment = {
   id: string
+  client_id?: string | null
   client_name: string
   client_phone: string | null
   starts_at: string

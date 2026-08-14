@@ -17,11 +17,11 @@ MVP mobile-first para sincronizar agenda, atendimento, faturamento e comissões 
 4. Cada cadastro público cria uma organização própria e torna a pessoa seu proprietário ativo.
 5. O proprietário conclui o onboarding convidando a primeira pessoa como administrador, agente ou atendente.
 6. Convites recebem senha temporária por Resend, podem ser compartilhados por WhatsApp e exigem troca no primeiro acesso.
-7. Proprietário/agente/admin cria o agendamento com cliente, horário, preço, duração e atendente.
-8. Atendente recebe sua agenda via Supabase Realtime.
-9. Proprietário/agente/admin pode remarcar, alterar valor, concluir, cancelar ou marcar falta.
+7. Qualquer membro ativo cria agendamentos com cliente, telefone opcional, horário sugerido, preço, duração, agente e atendente.
+8. O telefone identifica e cadastra o cliente automaticamente; números repetidos reutilizam o cadastro existente.
+9. Todos os papéis recebem a agenda compartilhada e podem editar, remarcar, concluir, cancelar, marcar falta ou excluir agendamentos.
 10. Mudanças relevantes ficam registradas no histórico.
-11. Fechamento diário e relatórios calculam faturamento, comissão, pagamentos do período e saldo acumulado conforme o papel logado.
+11. Fechamento diário e relatórios por dia, semana ou mês calculam faturamento, comissão, pagamentos e saldo acumulado, com exportação em PDF.
 12. Proprietário/admin configura comissão fixa ou percentual e duração padrão.
 
 ## Rodar localmente
@@ -44,6 +44,7 @@ O deploy só deve acontecer depois de todos os gates em [`docs/DEPLOYMENT.md`](d
 
 - Todas as tabelas expostas usam RLS.
 - O banco impede sobreposição de atendimentos por atendente.
+- O banco rejeita novos agendamentos e remarcações para horários passados.
 - Comissão usa snapshot protegido no banco.
 - Cada tenant possui exatamente um proprietário, que não pode ser removido, desativado ou rebaixado.
 - Papel e tenant dos convidados vêm de `app_metadata` criada somente no servidor.

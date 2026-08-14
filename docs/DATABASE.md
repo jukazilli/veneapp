@@ -18,24 +18,31 @@ Região: `sa-east-1`
 11. `20260813180000_add_owner_profile_role`
 12. `20260813180001_create_owner_onboarding_and_invitations`
 13. `20260813180002_harden_first_access`
+14. `20260813190000_expand_shared_agenda_and_clients`
+15. `20260813190001_fix_invited_member_tenant`
 
 ## Estrutura
 
 - `organizations`: operação/tenant e conclusão do onboarding
 - `profiles`: usuários, convite, troca obrigatória de senha e papéis (`owner`, `admin`, `agent`, `attendant`)
-- `settings`: comissão, duração padrão e timezone
-- `appointments`: agenda, preço, status e snapshot imutável da regra de comissão
+- `settings`: comissão, duração padrão, timezone e limites do expediente
+- `clients`: clientes deduplicados por organização e telefone normalizado
+- `appointments`: agenda, vínculo opcional com cliente, preço, status e snapshot imutável da regra de comissão
 - `appointment_events`: trilha de eventos da agenda
 - `agent_payments`: pagamentos realizados aos agentes
 
 ## Regras importantes no banco
 
 - Um atendente não pode ter dois agendamentos `scheduled` sobrepostos.
+- Novos agendamentos, remarcações e reaberturas não podem apontar para horários passados.
+- Todo membro ativo da organização pode criar, visualizar, editar e excluir agendamentos da agenda compartilhada.
+- Quando informado, o telefone é normalizado e cria ou reutiliza automaticamente um cliente na mesma organização.
 - `ends_at` é calculado automaticamente a partir de `starts_at + duration_min`.
 - A regra de comissão é capturada no momento da criação e permanece no agendamento.
 - Mudanças futuras na configuração de comissão não alteram agendamentos existentes.
 - Cada cadastro público cria um tenant próprio e um `owner` ativo.
 - Convites entram no tenant somente por metadados de aplicação criados pelo servidor.
+- O provisionamento registra uma pendência protegida antes de criar o usuário no Auth, evitando que o gatilho trate um convidado como cadastro público.
 - Cada organização tem um único proprietário, que não pode ser desativado, rebaixado ou movido.
 - Proprietários, agentes e administradores podem ser selecionados como responsáveis pela comissão.
 - Alterações de horário, status, duração, atendente e valor entram no histórico.

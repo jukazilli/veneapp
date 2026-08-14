@@ -6,6 +6,7 @@ import { dateTime, money, whatsappUrl } from '@/lib/format'
 import { localDateString } from '@/lib/dates'
 import { RescheduleForm } from '@/components/reschedule-form'
 import { StatusActionButton } from '@/components/status-action-button'
+import { DeleteAppointmentButton } from '@/components/delete-appointment-button'
 import type { AppointmentStatus, Profile } from '@/lib/types'
 
 const statusLabel: Record<AppointmentStatus, string> = {
@@ -28,23 +29,29 @@ function eventText(event: { event_type: string; to_status?: string | null }) {
   return 'Agendamento atualizado'
 }
 
-export default async function AppointmentPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AppointmentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
   const { id } = await params
+  const query = await searchParams
   const { supabase, profile } = await requireUser()
   const [{ data: appt }, { data: people = [] }, { data: events = [] }] = await Promise.all([
     supabase.from('appointments').select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)').eq('id', id).single(),
-    supabase.from('profiles').select('id,organization_id,full_name,email,role,active').eq('active', true).eq('role', 'attendant').order('full_name'),
+    supabase.from('profiles').select('id,organization_id,full_name,email,role,active,must_change_password').eq('active', true).order('full_name'),
     supabase.from('appointment_events').select('id,event_type,from_status,to_status,created_at,actor:profiles!appointment_events_actor_id_fkey(full_name)').eq('appointment_id', id).order('created_at', { ascending: false }).limit(8),
   ])
 
   if (!appt) notFound()
   const canManage = canManageAppointments(profile.role)
-  const canExecute = canManage || (profile.role === 'attendant' && appt.attendant_id === profile.id)
-  const attendants = (people || []) as Profile[]
+  const canExecute = canManage
+  const typedPeople = (people || []) as Profile[]
+  const attendants = typedPeople.filter(person => person.role === 'attendant')
+  const agents = typedPeople.filter(person => ['owner', 'admin', 'agent'].includes(person.role))
   const whatsapp = appt.client_phone ? whatsappUrl(appt.client_phone) : null
+  const appointmentDate = localDate(appt.starts_at)
+  const today = localDateString()
 
   return <main className="stack">
-    <div className="header"><div><div className="eyebrow">Atendimento</div><h1>{appt.client_name}</h1></div><Link href={`/agenda?date=${localDate(appt.starts_at)}`} className="button button-secondary">Voltar</Link></div>
+    <div className="header"><div><div className="eyebrow">Atendimento</div><h1>{appt.client_name}</h1></div><Link href={`/agenda?date=${appointmentDate}`} className="button button-secondary">Voltar</Link></div>
+    {query.error === 'delete' && <div className="notice error">Não foi possível excluir este agendamento.</div>}
 
     <div className="card stack">
       <div className="row-between"><strong className="appointment-date">{dateTime(appt.starts_at)}</strong><span className={`badge ${appt.status === 'completed' ? 'success' : appt.status === 'cancelled' ? 'danger' : appt.status === 'no_show' ? 'warning' : ''}`}>{statusLabel[appt.status as AppointmentStatus]}</span></div>
@@ -58,11 +65,11 @@ export default async function AppointmentPage({ params }: { params: Promise<{ id
 
     {canExecute && appt.status === 'scheduled' && <div className="stack">
       <StatusActionButton id={id} status="completed" label="Concluir atendimento" tone="primary" />
-      {canManage && <details className="card"><summary>Alterar horário, valor ou atendente</summary><div style={{ marginTop: 16 }}><RescheduleForm id={id} date={localDate(appt.starts_at)} time={localTime(appt.starts_at)} duration={appt.duration_min} price={Number(appt.price)} attendantId={appt.attendant_id} attendants={attendants} /></div></details>}
-      <details className="card danger-zone"><summary>Outras ações</summary><div className="stack" style={{ marginTop: 16 }}><StatusActionButton id={id} status="no_show" label="Marcar não comparecimento" />{canManage && <StatusActionButton id={id} status="cancelled" label="Cliente cancelou" tone="danger" />}</div></details>
+      {canManage && <details className="card"><summary>Editar agendamento</summary><div style={{ marginTop: 16 }}><RescheduleForm id={id} clientName={appt.client_name} clientPhone={appt.client_phone} date={appointmentDate} today={today} time={localTime(appt.starts_at)} duration={appt.duration_min} price={Number(appt.price)} attendantId={appt.attendant_id} agentId={appt.agent_id} notes={appt.notes} attendants={attendants} agents={agents} /></div></details>}
+      <details className="card danger-zone"><summary>Outras ações</summary><div className="stack" style={{ marginTop: 16 }}><StatusActionButton id={id} status="no_show" label="Marcar não comparecimento" />{canManage && <StatusActionButton id={id} status="cancelled" label="Cliente cancelou" tone="danger" />}{canManage && <DeleteAppointmentButton id={id} date={appointmentDate} />}</div></details>
     </div>}
 
-    {canManage && appt.status !== 'scheduled' && <StatusActionButton id={id} status="scheduled" label="Reabrir atendimento" />}
+    {canManage && appt.status !== 'scheduled' && <div className="stack"><StatusActionButton id={id} status="scheduled" label="Reabrir atendimento" /><DeleteAppointmentButton id={id} date={appointmentDate} /></div>}
 
     <section className="card">
       <div className="row-between"><h2>Histórico</h2><span className="small muted">Últimas alterações</span></div>

@@ -25,15 +25,20 @@ O script valida:
 5. Informar o nome da organização e convidar a segunda pessoa como **atendente**, com senha temporária e WhatsApp.
 6. Confirmar o recebimento do convite por Resend e a abertura correta do compartilhamento por WhatsApp.
 7. Entrar na segunda sessão com a senha temporária, definir uma senha própria e acessar a organização.
-8. Criar um agendamento com cliente, horário, preço, agente e atendente.
+   Confirmar que o convidado nunca vê o onboarding e permanece no tenant e papel definidos por quem convidou.
+8. Criar um agendamento com cliente, telefone, horário sugerido, preço, duração, agente e atendente.
 9. Confirmar que o atendimento aparece para o atendente sem recarregar manualmente.
 10. Tentar criar outro atendimento sobreposto para o mesmo atendente e confirmar bloqueio.
-11. Remarcar o primeiro atendimento e confirmar sincronização nas duas sessões.
-12. Como atendente, concluir o atendimento.
-13. Confirmar receita e comissão no fechamento.
-14. Registrar pagamento da comissão e confirmar redução do saldo.
-15. Criar outro atendimento e marcar **não compareceu** como atendente.
-16. Confirmar os números em Relatórios e o histórico do atendimento.
+11. Tentar informar um horário passado e confirmar bloqueio na tela e no banco.
+12. Repetir o telefone em outro agendamento e confirmar que o mesmo cliente é reutilizado.
+13. Como atendente, remarcar o primeiro atendimento e confirmar sincronização nas duas sessões.
+14. Como atendente, concluir o atendimento.
+15. Confirmar receita e comissão no fechamento.
+16. Registrar pagamento da comissão e confirmar redução do saldo.
+17. Criar outro atendimento e marcar **não compareceu** como atendente.
+18. Confirmar os números nos filtros diário, semanal e mensal de Relatórios.
+19. Exportar o relatório em PDF e abrir o arquivo.
+20. Excluir um agendamento como atendente e confirmar sua remoção da agenda compartilhada.
 
 ## Gate de produção
 

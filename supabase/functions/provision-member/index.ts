@@ -89,8 +89,21 @@ Deno.serve(async (request: Request) => {
     return json({ error: "Dados de convite inválidos." }, 400)
   }
 
+  const normalizedEmail = body.email.trim().toLowerCase()
+  const { error: stageError } = await adminClient
+    .from("pending_user_invitations")
+    .upsert({
+      email: normalizedEmail,
+      organization_id: profile.organization_id,
+      assigned_role: body.role,
+      invited_by: user.id,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    }, { onConflict: "email" })
+
+  if (stageError) return json({ error: "Não foi possível preparar o convite." }, 500)
+
   const { data: created, error: createError } = await adminClient.auth.admin.createUser({
-    email: body.email,
+    email: normalizedEmail,
     password: body.password,
     email_confirm: true,
     user_metadata: { full_name: body.fullName },
@@ -103,6 +116,7 @@ Deno.serve(async (request: Request) => {
   })
 
   if (createError || !created.user) {
+    await adminClient.from("pending_user_invitations").delete().eq("email", normalizedEmail)
     const alreadyExists = createError?.message.toLowerCase().includes("already")
       || createError?.message.toLowerCase().includes("registered")
     return json({

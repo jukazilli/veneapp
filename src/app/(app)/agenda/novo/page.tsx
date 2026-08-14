@@ -21,9 +21,10 @@ export default async function NewAppointmentPage({ searchParams }: { searchParam
   const agents = typed.filter(p => p.role === 'agent' || p.role === 'admin' || p.role === 'owner')
   const attendants = typed.filter(p => p.role === 'attendant')
   const defaultAgentId = agents.some(agent => agent.id === profile.id) ? profile.id : agents[0]?.id || ''
+  const defaultAttendantId = attendants.some(attendant => attendant.id === profile.id) ? profile.id : attendants[0]?.id || ''
 
   return <main>
     <div className="header"><div><div className="eyebrow">Novo atendimento</div><h1>Agendar</h1></div><Link href={`/agenda?date=${date}`} className="button button-secondary">Voltar</Link></div>
-    <div className="card"><NewAppointmentForm date={date} defaultTime={defaultTime} agents={agents} attendants={attendants} duration={settings?.default_duration_min || 60} defaultAgentId={defaultAgentId} /></div>
+    <div className="card"><NewAppointmentForm date={date} today={today} defaultTime={defaultTime} agents={agents} attendants={attendants} duration={settings?.default_duration_min || 60} defaultAgentId={defaultAgentId} defaultAttendantId={defaultAttendantId} /></div>
   </main>
 }

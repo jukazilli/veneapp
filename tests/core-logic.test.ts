@@ -11,6 +11,7 @@ import {
 } from '../src/lib/dates.ts'
 import { money, whatsappUrl } from '../src/lib/format.ts'
 import { outstandingCommissionBalance } from '../src/lib/finance.ts'
+import { findBestAvailableTime } from '../src/lib/availability.ts'
 import { buildAuthActionUrl, renderAuthEmail, type SendEmailHookPayload } from '../src/lib/auth-email.ts'
 import { buildWhatsAppInvitationUrl, isAssignableRole, isStrongTemporaryPassword } from '../src/lib/invitations.ts'
 
@@ -85,6 +86,45 @@ test('calcula semana de segunda a segunda', () => {
   assert.equal(bounds.endLocal, '2026-08-17')
 })
 
+test('calcula um relatório diário sem atravessar a meia-noite local', () => {
+  const bounds = periodBounds('day', new Date('2026-08-12T15:00:00.000Z'))
+  assert.equal(bounds.startLocal, '2026-08-12')
+  assert.equal(bounds.endLocal, '2026-08-13')
+})
+
+test('sugere o encaixe que deixa a menor sobra na agenda', () => {
+  const suggestion = findBestAvailableTime({
+    date: '2026-08-14',
+    durationMin: 30,
+    workdayStart: '08:00',
+    workdayEnd: '12:00',
+    now: new Date('2026-08-13T15:00:00.000Z'),
+    appointments: [
+      { starts_at: zonedLocalToIso('2026-08-14', '09:00'), ends_at: zonedLocalToIso('2026-08-14', '10:00') },
+      { starts_at: zonedLocalToIso('2026-08-14', '10:30'), ends_at: zonedLocalToIso('2026-08-14', '11:00') },
+    ],
+  })
+  assert.equal(suggestion, '10:00')
+})
+
+test('não sugere horários passados nem datas anteriores', () => {
+  assert.equal(findBestAvailableTime({
+    date: '2026-08-12',
+    durationMin: 30,
+    appointments: [],
+    now: new Date('2026-08-13T15:00:00.000Z'),
+  }), null)
+
+  assert.equal(findBestAvailableTime({
+    date: '2026-08-13',
+    durationMin: 30,
+    workdayStart: '08:00',
+    workdayEnd: '20:00',
+    appointments: [],
+    now: new Date('2026-08-13T12:02:00.000Z'),
+  }), '09:05')
+})
+
 test('navegação de datas e próximo quarto de hora funcionam', () => {
   assert.equal(shiftLocalDate('2026-08-31', 1), '2026-09-01')
   assert.deepEqual(nextQuarterHourString(new Date('2026-08-13T01:07:00.000Z')), {
@@ -129,6 +169,18 @@ test('link de autenticação mantém apenas um próximo destino interno', () => 
 
   emailData.redirect_to = 'https://veneapp-9sff.vercel.app/auth/confirm?next=//evil.example'
   assert.equal(new URL(buildAuthActionUrl(emailData)).searchParams.has('next'), false)
+})
+
+test('confirmação de cadastro segue diretamente para o onboarding', () => {
+  const url = new URL(buildAuthActionUrl({
+    token: '123456',
+    token_hash: 'signup-token-hash',
+    redirect_to: 'https://veneapp-9sff.vercel.app/auth/confirm?next=/onboarding',
+    email_action_type: 'signup',
+    site_url: 'https://veneapp-9sff.vercel.app',
+  }))
+  assert.equal(url.pathname, '/auth/confirm')
+  assert.equal(url.searchParams.get('next'), '/onboarding')
 })
 
 test('template do Resend escapa metadados do usuário', () => {

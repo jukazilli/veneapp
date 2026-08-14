@@ -38,13 +38,17 @@ export function dayBounds(localDate: string, timeZone = TIME_ZONE) {
   return { start, end }
 }
 
-export function periodBounds(period: 'week' | 'month', base = new Date()) {
+export function periodBounds(period: 'day' | 'week' | 'month', base = new Date()) {
   const today = localDateString(base)
   const [y,m,d] = today.split('-').map(Number)
   const pivot = new Date(Date.UTC(y,m-1,d,12))
   let startDate: Date
   let endDate: Date
-  if (period === 'week') {
+  if (period === 'day') {
+    startDate = new Date(pivot)
+    endDate = new Date(pivot)
+    endDate.setUTCDate(pivot.getUTCDate() + 1)
+  } else if (period === 'week') {
     const day = pivot.getUTCDay() || 7
     startDate = new Date(pivot)
     startDate.setUTCDate(pivot.getUTCDate() - day + 1)
