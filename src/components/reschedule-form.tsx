@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import { rescheduleAppointmentAction } from '@/app/(app)/actions'
+import { DurationInput } from '@/components/duration-input'
 import type { Profile } from '@/lib/types'
 
 type Props = {
@@ -35,8 +36,8 @@ export function RescheduleForm({ id, clientName, clientPhone, date, today, time,
       <div className="field"><label>Hora de início</label><input className="input time-input" name="time" type="time" step="300" defaultValue={time} required /></div>
     </div>
     <div className="grid-2">
-      <div className="field"><label>Valor do serviço</label><input className="input" name="price" type="number" step="0.01" min="0" defaultValue={price} required /></div>
-      <div className="field"><label>Duração</label><select className="select" name="duration_min" defaultValue={duration}>{[15, 30, 45, 60, 90, 120, 180].map(value => <option key={value} value={value}>{value} min</option>)}</select></div>
+      <div className="field"><label>Valor</label><input className="input" name="price" type="number" step="0.01" min="0" defaultValue={price} required /></div>
+      <div className="field"><label>Duração (HH:MM)</label><DurationInput defaultMinutes={duration} /></div>
     </div>
     <div className="grid-2">
       <div className="field"><label>Atendente</label><select className="select" name="attendant_id" defaultValue={attendantId} required>{attendants.map(person => <option key={person.id} value={person.id}>{person.full_name}</option>)}</select></div>

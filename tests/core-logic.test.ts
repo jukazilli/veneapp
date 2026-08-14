@@ -10,7 +10,8 @@ import {
   zonedLocalToIso,
 } from '../src/lib/dates.ts'
 import { money, whatsappUrl } from '../src/lib/format.ts'
-import { outstandingCommissionBalance } from '../src/lib/finance.ts'
+import { completedFinancialTotals, outstandingCommissionBalance } from '../src/lib/finance.ts'
+import { formatDurationHHMM, normalizeDurationTyping, parseDurationHHMM } from '../src/lib/duration.ts'
 import { findBestAvailableTime } from '../src/lib/availability.ts'
 import { buildAuthActionUrl, renderAuthEmail, type SendEmailHookPayload } from '../src/lib/auth-email.ts'
 import { buildWhatsAppInvitationUrl, isAssignableRole, isStrongTemporaryPassword } from '../src/lib/invitations.ts'
@@ -133,6 +134,18 @@ test('navegação de datas e próximo quarto de hora funcionam', () => {
   })
 })
 
+test('duração HH:MM converte com segurança para minutos inteiros', () => {
+  assert.equal(parseDurationHHMM('00:30'), 30)
+  assert.equal(parseDurationHHMM('01:00'), 60)
+  assert.equal(parseDurationHHMM('12:00'), 720)
+  assert.equal(parseDurationHHMM('00:04'), null)
+  assert.equal(parseDurationHHMM('12:01'), null)
+  assert.equal(parseDurationHHMM('1:00'), null)
+  assert.equal(parseDurationHHMM('00:60'), null)
+  assert.equal(formatDurationHHMM(90), '01:30')
+  assert.equal(normalizeDurationTyping('0030'), '00:30')
+})
+
 test('formatação monetária e link de WhatsApp', () => {
   assert.match(money(1234.5), /1\.234,50/)
   assert.equal(whatsappUrl('(47) 99999-1234'), 'https://wa.me/5547999991234')
@@ -149,6 +162,18 @@ test('saldo de comissão é acumulado e preserva dívida de períodos anteriores
   ]
   const payments = [{ amount: 20 }, { amount: '10.50' }]
   assert.equal(outstandingCommissionBalance(commissions, payments), 50)
+})
+
+test('financeiro mantém bruto, comissão e líquido do atendente sincronizados', () => {
+  const totals = completedFinancialTotals([
+    { status: 'completed', price: 120, commission_amount: 30, net_amount: 90 },
+    { status: 'cancelled', price: 200, commission_amount: 50, net_amount: 150 },
+  ])
+  assert.deepEqual(totals, {
+    grossRevenue: 120,
+    commission: 30,
+    attendantNet: 90,
+  })
 })
 
 test('link de autenticação mantém apenas um próximo destino interno', () => {

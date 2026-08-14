@@ -31,16 +31,16 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <button className="button button-primary" type="submit">Aplicar filtro</button>
     </form>
     <div className="kpis">
-      <div className="kpi"><div className="kpi-label">Faturamento</div><div className="kpi-value">{money(report.revenue)}</div></div>
-      <div className="kpi"><div className="kpi-label">Comissões</div><div className="kpi-value">{money(report.commission)}</div></div>
-      <div className="kpi"><div className="kpi-label">Pagamentos</div><div className="kpi-value">{money(report.paid)}</div></div>
-      <div className="kpi"><div className="kpi-label">{report.balanceLabel} acumulado</div><div className="kpi-value">{money(report.outstanding)}</div></div>
+      <div className="kpi"><div className="kpi-label">Faturamento bruto</div><div className="kpi-value">{money(report.grossRevenue)}</div></div>
+      <div className="kpi"><div className="kpi-label">Líquido do atendente</div><div className="kpi-value">{money(report.attendantNet)}</div></div>
+      <div className="kpi"><div className="kpi-label">Comissão a pagar</div><div className="kpi-value">{money(report.commission)}</div></div>
+      <div className="kpi"><div className="kpi-label">Comissão paga</div><div className="kpi-value">{money(report.commissionPaid)}</div></div>
     </div>
     <div className="card stack">
       <div className="row-between"><span>Atendimentos concluídos</span><strong>{report.completed}</strong></div><div className="divider" />
       <div className="row-between"><span>Cancelamentos</span><strong>{report.cancellations}</strong></div><div className="divider" />
       <div className="row-between"><span>Não compareceu</span><strong>{report.noShows}</strong></div><div className="divider" />
-      <div className="row-between"><span>Movimento líquido do período</span><strong>{money(report.netMovement)}</strong></div>
+      <div className="row-between"><span>Saldo de comissão acumulado</span><strong>{money(report.commissionBalance)}</strong></div>
     </div>
   </main>
 }

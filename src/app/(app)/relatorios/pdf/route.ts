@@ -27,14 +27,14 @@ export async function GET(request: Request) {
   document.moveDown(1.5)
 
   const rows: Array<[string, string]> = [
-    ['Faturamento', safeMoney(report.revenue)],
-    ['Comissões', safeMoney(report.commission)],
-    ['Pagamentos', safeMoney(report.paid)],
-    [`${report.balanceLabel} acumulado`, safeMoney(report.outstanding)],
+    ['Faturamento bruto', safeMoney(report.grossRevenue)],
+    ['Líquido do atendente', safeMoney(report.attendantNet)],
+    ['Comissão a pagar', safeMoney(report.commission)],
+    ['Comissão paga', safeMoney(report.commissionPaid)],
+    ['Saldo de comissão acumulado', safeMoney(report.commissionBalance)],
     ['Atendimentos concluídos', String(report.completed)],
     ['Cancelamentos', String(report.cancellations)],
     ['Não compareceu', String(report.noShows)],
-    ['Movimento líquido do período', safeMoney(report.netMovement)],
   ]
 
   for (const [label, value] of rows) {

@@ -46,14 +46,16 @@ O Veneapp deve reduzir passos, não adicionar burocracia. O WhatsApp continua se
 3. Agente registra o atendimento no Veneapp.
 4. O atendente recebe o novo horário pela agenda compartilhada.
 5. Qualquer remarcação/cancelamento/encaixe altera a mesma agenda.
-6. Atendimento concluído entra no fechamento.
+6. Atendimento concluído entra no fechamento como faturamento bruto.
 7. Comissão é calculada automaticamente pela regra capturada quando o agendamento foi criado.
-8. Pagamentos ao agente são registrados e reduzem o saldo pendente acumulado; dívidas de dias anteriores não desaparecem no fechamento.
+8. O líquido do atendente é sempre o faturamento bruto menos a comissão.
+9. Pagamentos ao agente são registrados e reduzem somente o saldo pendente de comissão; dívidas de dias anteriores não desaparecem no fechamento.
 
 ## 6. Serviços e preços
 - Não existe cadastro de serviços no MVP.
 - Cada atendimento recebe preço livre no momento do agendamento.
-- Duração padrão inicial: 60 minutos, editável.
+- Duração padrão inicial: `01:00`, editável por digitação no formato `HH:MM` (por exemplo, `00:30` ou `01:00`).
+- A interface trabalha em `HH:MM`; API e banco convertem e persistem a duração como minutos inteiros.
 - Observações são livres por atendimento.
 - O telefone é opcional e, quando informado, identifica e cadastra o cliente automaticamente.
 
@@ -63,6 +65,13 @@ Dois modos configuráveis:
 - **Percentual:** percentual sobre o valor do atendimento.
 
 A regra e o valor usados são congelados no agendamento. Alterações futuras nas configurações não recalculam o histórico.
+
+Contrato financeiro de cada atendimento concluído:
+- **Faturamento bruto:** valor integral informado no agendamento.
+- **Comissão:** valor fixo ou percentual devido ao agente.
+- **Líquido do atendente:** faturamento bruto menos comissão.
+
+Exemplo: para um valor de R$ 120,00 e comissão de R$ 30,00, o faturamento bruto é R$ 120,00 e o líquido do atendente é R$ 90,00. Um pagamento de comissão não altera o faturamento nem o líquido; ele reduz apenas o saldo de comissão acumulado.
 
 ## 8. Agenda e estados
 Estados previstos:
@@ -81,10 +90,11 @@ Regras:
 Somente atendimentos concluídos entram no faturamento.
 
 Indicadores:
-- Faturamento
-- Comissão gerada
-- Pagamentos realizados
-- Saldo a pagar / receber
+- Faturamento bruto
+- Líquido do atendente
+- Comissão a pagar
+- Comissão paga
+- Saldo de comissão acumulado
 - Atendimentos concluídos
 - Cancelamentos
 - Não comparecimentos

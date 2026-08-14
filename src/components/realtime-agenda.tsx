@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { money, time } from '@/lib/format'
 import type { Appointment } from '@/lib/types'
+import { formatDurationHHMM } from '@/lib/duration'
 
 const statusLabel = { scheduled: 'Confirmado', completed: 'Concluído', cancelled: 'Cancelado', no_show: 'Não compareceu' }
 const statusClass = { scheduled: '', completed: 'success', cancelled: 'danger', no_show: 'warning' }
@@ -57,7 +58,7 @@ export function RealtimeAgenda({ appointments, organizationId }: { appointments:
         <div className="appt-time">{time(item.starts_at)}</div>
         <div className="appt-body">
           <div className="row-between"><div className="appt-title">{item.client_name}</div><span className={`badge ${statusClass[item.status]}`}>{statusLabel[item.status]}</span></div>
-          <div className="appt-meta">{item.attendant?.full_name || 'Atendente'} · {item.duration_min} min</div>
+          <div className="appt-meta">{item.attendant?.full_name || 'Atendente'} · {formatDurationHHMM(item.duration_min)}</div>
           <div className="row-between" style={{ marginTop: 8 }}><span className="small muted">Agente: {item.agent?.full_name || '—'}</span><strong>{money(item.price)}</strong></div>
         </div>
       </Link>)}</div>}

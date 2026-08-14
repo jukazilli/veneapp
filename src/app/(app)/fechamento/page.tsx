@@ -2,7 +2,7 @@ import { requireUser } from '@/lib/session'
 import { dayBounds, localDateString } from '@/lib/dates'
 import { money } from '@/lib/format'
 import { PaymentForm } from '@/components/payment-form'
-import { outstandingCommissionBalance } from '@/lib/finance'
+import { completedFinancialTotals, outstandingCommissionBalance, paymentTotal } from '@/lib/finance'
 import type { Profile } from '@/lib/types'
 
 export default async function ClosingPage() {
@@ -11,7 +11,7 @@ export default async function ClosingPage() {
   const { start, end } = dayBounds(today)
 
   let apptQuery = supabase.from('appointments')
-    .select('id,price,commission_amount,agent_id,attendant_id,status')
+    .select('id,price,commission_amount,net_amount,agent_id,attendant_id,status')
     .gte('starts_at', start)
     .lt('starts_at', end)
 
@@ -58,9 +58,8 @@ export default async function ClosingPage() {
   ])
 
   const completed = (appointments || []).filter(a => a.status === 'completed')
-  const revenue = completed.reduce((sum, item) => sum + Number(item.price), 0)
-  const commissions = completed.reduce((sum, item) => sum + Number(item.commission_amount), 0)
-  const paid = (payments || []).reduce((sum, item) => sum + Number(item.amount), 0)
+  const totals = completedFinancialTotals(completed)
+  const paid = paymentTotal(payments || [])
   const outstanding = outstandingCommissionBalance(balanceAppointments || [], balancePayments || [])
   const cancelled = (appointments || []).filter(a => a.status === 'cancelled').length
   const noShows = (appointments || []).filter(a => a.status === 'no_show').length
@@ -68,20 +67,19 @@ export default async function ClosingPage() {
   const canPay = ['owner', 'admin', 'attendant'].includes(profile.role)
 
   const scope = profile.role === 'owner' || profile.role === 'admin' ? 'Operação inteira' : profile.role === 'agent' ? 'Seus agendamentos' : 'Seus atendimentos'
-  const balanceLabel = profile.role === 'agent' ? 'Saldo a receber' : 'Saldo a repassar'
 
   return <main className="stack">
     <div><div className="eyebrow">{today.split('-').reverse().join('/')} · {scope}</div><h1>Fechamento do dia</h1><p className="muted">Só atendimentos concluídos entram nos valores.</p></div>
 
     <div className="kpis">
-      <div className="kpi"><div className="kpi-label">Faturamento</div><div className="kpi-value">{money(revenue)}</div></div>
-      <div className="kpi"><div className="kpi-label">Comissão gerada</div><div className="kpi-value">{money(commissions)}</div></div>
-      <div className="kpi"><div className="kpi-label">Pagamentos</div><div className="kpi-value">{money(paid)}</div></div>
-      <div className="kpi"><div className="kpi-label">{balanceLabel} acumulado</div><div className="kpi-value">{money(outstanding)}</div></div>
+      <div className="kpi"><div className="kpi-label">Faturamento bruto</div><div className="kpi-value">{money(totals.grossRevenue)}</div></div>
+      <div className="kpi"><div className="kpi-label">Líquido do atendente</div><div className="kpi-value">{money(totals.attendantNet)}</div></div>
+      <div className="kpi"><div className="kpi-label">Comissão a pagar</div><div className="kpi-value">{money(totals.commission)}</div></div>
+      <div className="kpi"><div className="kpi-label">Comissão paga</div><div className="kpi-value">{money(paid)}</div></div>
     </div>
 
-    <div className="card row-between"><div><strong>{completed.length} concluídos</strong><div className="muted small">{cancelled} cancelados · {noShows} faltas · movimento líquido do dia {money(commissions - paid)}</div></div><span className="badge success">Atualizado</span></div>
+    <div className="card row-between"><div><strong>{completed.length} concluídos</strong><div className="muted small">{cancelled} cancelados · {noShows} faltas · saldo de comissão {money(outstanding)}</div></div><span className="badge success">Atualizado</span></div>
 
-    {canPay && <details className="card"><summary>Registrar pagamento ao agente</summary><div style={{ marginTop: 16 }}><PaymentForm agents={agents} /></div></details>}
+    {canPay && <details className="card"><summary>Registrar pagamento da comissão</summary><div style={{ marginTop: 16 }}><PaymentForm agents={agents} /></div></details>}
   </main>
 }

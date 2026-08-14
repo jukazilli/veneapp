@@ -26,15 +26,15 @@ O script valida:
 6. Confirmar o recebimento do convite por Resend e a abertura correta do compartilhamento por WhatsApp.
 7. Entrar na segunda sessão com a senha temporária, definir uma senha própria e acessar a organização.
    Confirmar que o convidado nunca vê o onboarding e permanece no tenant e papel definidos por quem convidou.
-8. Criar um agendamento com cliente, telefone, horário sugerido, preço, duração, agente e atendente.
+8. Criar um agendamento com cliente, telefone, horário sugerido, valor de R$ 120,00, duração digitada como `00:30`, agente e atendente.
 9. Confirmar que o atendimento aparece para o atendente sem recarregar manualmente.
 10. Tentar criar outro atendimento sobreposto para o mesmo atendente e confirmar bloqueio.
 11. Tentar informar um horário passado e confirmar bloqueio na tela e no banco.
 12. Repetir o telefone em outro agendamento e confirmar que o mesmo cliente é reutilizado.
 13. Como atendente, remarcar o primeiro atendimento e confirmar sincronização nas duas sessões.
 14. Como atendente, concluir o atendimento.
-15. Confirmar receita e comissão no fechamento.
-16. Registrar pagamento da comissão e confirmar redução do saldo.
+15. Com comissão fixa de R$ 30,00, confirmar no fechamento: faturamento bruto de R$ 120,00, comissão a pagar de R$ 30,00 e líquido do atendente de R$ 90,00.
+16. Registrar pagamento da comissão e confirmar que somente o saldo de comissão diminui; faturamento bruto e líquido do atendente permanecem inalterados.
 17. Criar outro atendimento e marcar **não compareceu** como atendente.
 18. Confirmar os números nos filtros diário, semanal e mensal de Relatórios.
 19. Exportar o relatório em PDF e abrir o arquivo.

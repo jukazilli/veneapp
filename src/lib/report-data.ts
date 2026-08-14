@@ -1,6 +1,6 @@
 import { requireUser } from '@/lib/session'
 import { localDateString, periodBounds, shiftLocalDate } from '@/lib/dates'
-import { outstandingCommissionBalance } from '@/lib/finance'
+import { completedFinancialTotals, outstandingCommissionBalance, paymentTotal } from '@/lib/finance'
 
 export type ReportPeriod = 'day' | 'week' | 'month'
 
@@ -17,7 +17,7 @@ export async function loadReportData(period: ReportPeriod, base: Date) {
   const { start, end, startLocal, endLocal } = periodBounds(period, base)
 
   let apptQuery = supabase.from('appointments')
-    .select('id,price,commission_amount,status,agent_id,attendant_id')
+    .select('id,price,commission_amount,net_amount,status,agent_id,attendant_id')
     .gte('starts_at', start)
     .lt('starts_at', end)
 
@@ -56,9 +56,8 @@ export async function loadReportData(period: ReportPeriod, base: Date) {
   ] = await Promise.all([apptQuery, payQuery, balanceApptQuery, balancePayQuery])
 
   const done = (appointments || []).filter(item => item.status === 'completed')
-  const revenue = done.reduce((sum, item) => sum + Number(item.price), 0)
-  const commission = done.reduce((sum, item) => sum + Number(item.commission_amount), 0)
-  const paid = (payments || []).reduce((sum, item) => sum + Number(item.amount), 0)
+  const totals = completedFinancialTotals(done)
+  const paid = paymentTotal(payments || [])
   const outstanding = outstandingCommissionBalance(balanceAppointments || [], balancePayments || [])
   const finalDay = shiftLocalDate(endLocal, -1)
 
@@ -67,15 +66,14 @@ export async function loadReportData(period: ReportPeriod, base: Date) {
     selectedDate: localDateString(base, 'UTC'),
     startLocal,
     finalDay,
-    revenue,
-    commission,
-    paid,
-    outstanding,
+    grossRevenue: totals.grossRevenue,
+    attendantNet: totals.attendantNet,
+    commission: totals.commission,
+    commissionPaid: paid,
+    commissionBalance: outstanding,
     completed: done.length,
     cancellations: (appointments || []).filter(item => item.status === 'cancelled').length,
     noShows: (appointments || []).filter(item => item.status === 'no_show').length,
-    netMovement: commission - paid,
     scope: profile.role === 'owner' || profile.role === 'admin' ? 'Operação inteira' : profile.role === 'agent' ? 'Seus agendamentos' : 'Seus atendimentos',
-    balanceLabel: profile.role === 'agent' ? 'A receber' : 'A repassar',
   }
 }

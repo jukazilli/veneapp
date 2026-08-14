@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { createAppointmentAction } from '@/app/(app)/actions'
+import { DurationInput } from '@/components/duration-input'
+import { formatDurationHHMM, parseDurationHHMM } from '@/lib/duration'
 import type { Profile } from '@/lib/types'
 
 export function NewAppointmentForm({
@@ -26,13 +28,14 @@ export function NewAppointmentForm({
   const [state, action, pending] = useActionState(createAppointmentAction, {})
   const [appointmentDate, setAppointmentDate] = useState(date)
   const [time, setTime] = useState(defaultTime)
-  const [durationMin, setDurationMin] = useState(duration)
+  const [durationValue, setDurationValue] = useState(formatDurationHHMM(duration))
+  const durationMin = parseDurationHHMM(durationValue)
   const [attendantId, setAttendantId] = useState(defaultAttendantId)
   const [suggestion, setSuggestion] = useState<string | null>(null)
   const [checkingAvailability, setCheckingAvailability] = useState(Boolean(date && defaultAttendantId && duration))
 
   useEffect(() => {
-    if (!appointmentDate || !attendantId || !durationMin) return
+    if (!appointmentDate || !attendantId || durationMin === null) return
     const controller = new AbortController()
     let active = true
     const query = new URLSearchParams({
@@ -77,10 +80,10 @@ export function NewAppointmentForm({
     </section>
 
     <section className="form-section">
-      <div className="form-section-title">Valor e comissão</div>
+      <div className="form-section-title">Detalhes</div>
       <div className="grid-2">
-        <div className="field"><label>Valor do serviço</label><input className="input" name="price" type="number" min="0" step="0.01" inputMode="decimal" placeholder="0,00" required /></div>
-        <div className="field"><label>Duração</label><select className="select" name="duration_min" value={durationMin} onChange={event => { setCheckingAvailability(true); setDurationMin(Number(event.target.value)) }}>{[15, 30, 45, 60, 90, 120, 180].map(value => <option key={value} value={value}>{value} min</option>)}</select></div>
+        <div className="field"><label>Valor</label><input className="input" name="price" type="number" min="0" step="0.01" inputMode="decimal" placeholder="0,00" required /></div>
+        <div className="field"><label>Duração (HH:MM)</label><DurationInput defaultMinutes={duration} value={durationValue} onValueChange={nextValue => { setDurationValue(nextValue); setCheckingAvailability(parseDurationHHMM(nextValue) !== null) }} /></div>
       </div>
       <div className="field"><label>Agente</label><select className="select" name="agent_id" required defaultValue={defaultAgentId}>{agents.map(person => <option key={person.id} value={person.id}>{person.full_name}</option>)}</select></div>
     </section>

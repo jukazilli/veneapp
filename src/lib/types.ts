@@ -29,6 +29,7 @@ export type Appointment = {
   ends_at: string
   duration_min: number
   price: number
+  net_amount: number
   status: AppointmentStatus
   commission_amount: number
   notes: string | null

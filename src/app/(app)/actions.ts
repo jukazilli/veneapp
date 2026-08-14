@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/session'
 import { zonedLocalToIso } from '@/lib/dates'
+import { parseDurationHHMM } from '@/lib/duration'
 import { canManageAppointments, isOrganizationManager, type AppointmentStatus, type CommissionMode, type ProfileRole } from '@/lib/types'
 
 export type ActionState = { error?: string; success?: string }
@@ -12,13 +13,10 @@ function decimal(value: FormDataEntryValue | null) {
   return Number(String(value ?? '0').replace(',', '.'))
 }
 
-function validDuration(value: number) {
-  return Number.isInteger(value) && value >= 5 && value <= 720
-}
-
 function humanizeDbError(message: string) {
   if (message.includes('horário que já passou')) return 'Escolha um horário futuro.'
   if (message.includes('Telefone do cliente inválido')) return 'Informe um telefone com DDD ou deixe o campo em branco.'
+  if (message.includes('appointments_commission_not_above_price')) return 'A comissão configurada não pode ser maior que o valor.'
   if (message.includes('Agente inválido')) return 'O agente selecionado está inativo ou não pertence à operação.'
   if (message.includes('Atendente inválido')) return 'O atendente selecionado está inativo ou não pertence à operação.'
   if (message.includes('administrador ativo')) return 'A operação precisa manter pelo menos um administrador ativo.'
@@ -37,12 +35,12 @@ export async function createAppointmentAction(_: ActionState, formData: FormData
   const time = String(formData.get('time') || '')
   const attendantId = String(formData.get('attendant_id') || '')
   const agentId = String(formData.get('agent_id') || profile.id)
-  const duration = Number(formData.get('duration_min') || 60)
+  const duration = parseDurationHHMM(formData.get('duration_hhmm'))
   const price = decimal(formData.get('price'))
 
   if (!clientName || !date || !time || !attendantId || !agentId) return { error: 'Preencha os campos obrigatórios.' }
   if (!Number.isFinite(price) || price < 0) return { error: 'Informe um valor válido.' }
-  if (!validDuration(duration)) return { error: 'Informe uma duração entre 5 e 720 minutos.' }
+  if (duration === null) return { error: 'Digite a duração em HH:MM, entre 00:05 e 12:00.' }
 
   const { data: settings } = await supabase
     .from('settings')
@@ -111,12 +109,12 @@ export async function rescheduleAppointmentAction(_: ActionState, formData: Form
   const attendantId = String(formData.get('attendant_id') || '')
   const agentId = String(formData.get('agent_id') || '')
   const clientName = String(formData.get('client_name') || '').trim()
-  const duration = Number(formData.get('duration_min') || 60)
+  const duration = parseDurationHHMM(formData.get('duration_hhmm'))
   const price = decimal(formData.get('price'))
 
   if (!id || !date || !time || !attendantId || !agentId || !clientName) return { error: 'Preencha cliente, data, hora, agente e atendente.' }
   if (!Number.isFinite(price) || price < 0) return { error: 'Informe um valor válido.' }
-  if (!validDuration(duration)) return { error: 'Informe uma duração entre 5 e 720 minutos.' }
+  if (duration === null) return { error: 'Digite a duração em HH:MM, entre 00:05 e 12:00.' }
 
   const { data: settings } = await supabase
     .from('settings')
@@ -183,7 +181,7 @@ export async function recordPaymentAction(_: ActionState, formData: FormData): P
   if (error) return { error: humanizeDbError(error.message) }
   revalidatePath('/fechamento')
   revalidatePath('/relatorios')
-  return { success: 'Pagamento registrado.' }
+  return { success: 'Pagamento da comissão registrado.' }
 }
 
 export async function updateSettingsAction(_: ActionState, formData: FormData): Promise<ActionState> {
@@ -192,12 +190,12 @@ export async function updateSettingsAction(_: ActionState, formData: FormData): 
 
   const mode = String(formData.get('commission_mode') || 'fixed') as CommissionMode
   const value = decimal(formData.get('commission_value'))
-  const duration = Number(formData.get('default_duration_min') || 60)
+  const duration = parseDurationHHMM(formData.get('duration_hhmm'))
 
   if (!['fixed', 'percentage'].includes(mode) || !Number.isFinite(value) || value < 0 || (mode === 'percentage' && value > 100)) {
     return { error: 'Configuração de comissão inválida.' }
   }
-  if (!validDuration(duration)) return { error: 'A duração padrão precisa ficar entre 5 e 720 minutos.' }
+  if (duration === null) return { error: 'Digite a duração padrão em HH:MM, entre 00:05 e 12:00.' }
 
   const { error } = await supabase.from('settings').update({
     commission_mode: mode,

@@ -20,6 +20,7 @@ Região: `sa-east-1`
 13. `20260813180002_harden_first_access`
 14. `20260813190000_expand_shared_agenda_and_clients`
 15. `20260813190001_fix_invited_member_tenant`
+16. `20260814014815_add_appointment_net_amount`
 
 ## Estrutura
 
@@ -27,7 +28,7 @@ Região: `sa-east-1`
 - `profiles`: usuários, convite, troca obrigatória de senha e papéis (`owner`, `admin`, `agent`, `attendant`)
 - `settings`: comissão, duração padrão, timezone e limites do expediente
 - `clients`: clientes deduplicados por organização e telefone normalizado
-- `appointments`: agenda, vínculo opcional com cliente, preço, status e snapshot imutável da regra de comissão
+- `appointments`: agenda, vínculo opcional com cliente, preço bruto, líquido gerado, status e snapshot imutável da regra de comissão
 - `appointment_events`: trilha de eventos da agenda
 - `agent_payments`: pagamentos realizados aos agentes
 
@@ -38,7 +39,10 @@ Região: `sa-east-1`
 - Todo membro ativo da organização pode criar, visualizar, editar e excluir agendamentos da agenda compartilhada.
 - Quando informado, o telefone é normalizado e cria ou reutiliza automaticamente um cliente na mesma organização.
 - `ends_at` é calculado automaticamente a partir de `starts_at + duration_min`.
+- A interface recebe duração em `HH:MM`; a aplicação valida o intervalo de `00:05` a `12:00` e converte para `duration_min` antes de persistir.
 - A regra de comissão é capturada no momento da criação e permanece no agendamento.
+- `net_amount` é uma coluna gerada pelo banco como `price - commission_amount` e representa o líquido do atendente.
+- A comissão não pode ser maior que o valor bruto do agendamento.
 - Mudanças futuras na configuração de comissão não alteram agendamentos existentes.
 - Cada cadastro público cria um tenant próprio e um `owner` ativo.
 - Convites entram no tenant somente por metadados de aplicação criados pelo servidor.

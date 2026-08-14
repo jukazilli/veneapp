@@ -34,7 +34,7 @@ export default async function AppointmentPage({ params, searchParams }: { params
   const query = await searchParams
   const { supabase, profile } = await requireUser()
   const [{ data: appt }, { data: people = [] }, { data: events = [] }] = await Promise.all([
-    supabase.from('appointments').select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)').eq('id', id).single(),
+    supabase.from('appointments').select('id,client_name,client_phone,starts_at,ends_at,duration_min,price,net_amount,status,commission_amount,notes,agent_id,attendant_id,agent:profiles!appointments_agent_id_fkey(full_name),attendant:profiles!appointments_attendant_id_fkey(full_name)').eq('id', id).single(),
     supabase.from('profiles').select('id,organization_id,full_name,email,role,active,must_change_password').eq('active', true).order('full_name'),
     supabase.from('appointment_events').select('id,event_type,from_status,to_status,created_at,actor:profiles!appointment_events_actor_id_fkey(full_name)').eq('appointment_id', id).order('created_at', { ascending: false }).limit(8),
   ])
@@ -57,7 +57,8 @@ export default async function AppointmentPage({ params, searchParams }: { params
       <div className="row-between"><strong className="appointment-date">{dateTime(appt.starts_at)}</strong><span className={`badge ${appt.status === 'completed' ? 'success' : appt.status === 'cancelled' ? 'danger' : appt.status === 'no_show' ? 'warning' : ''}`}>{statusLabel[appt.status as AppointmentStatus]}</span></div>
       <div className="list-row"><span className="muted">Atendente</span><strong>{(appt.attendant as unknown as { full_name: string } | null)?.full_name || '—'}</strong></div>
       <div className="list-row"><span className="muted">Agente</span><strong>{(appt.agent as unknown as { full_name: string } | null)?.full_name || '—'}</strong></div>
-      <div className="list-row"><span className="muted">Valor</span><strong>{money(appt.price)}</strong></div>
+      <div className="list-row"><span className="muted">Faturamento bruto</span><strong>{money(appt.price)}</strong></div>
+      <div className="list-row"><span className="muted">Líquido do atendente</span><strong>{money(appt.net_amount)}</strong></div>
       {canManage && <div className="list-row"><span className="muted">Comissão</span><strong>{money(appt.commission_amount)}</strong></div>}
       {appt.client_phone && <div className="list-row"><span className="muted">WhatsApp</span>{whatsapp ? <a href={whatsapp} target="_blank" rel="noreferrer" className="text-link">{appt.client_phone} ↗</a> : <strong>{appt.client_phone}</strong>}</div>}
       {appt.notes && <div><div className="muted small">Observação</div><p>{appt.notes}</p></div>}

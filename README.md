@@ -17,11 +17,11 @@ MVP mobile-first para sincronizar agenda, atendimento, faturamento e comissões 
 4. Cada cadastro público cria uma organização própria e torna a pessoa seu proprietário ativo.
 5. O proprietário conclui o onboarding convidando a primeira pessoa como administrador, agente ou atendente.
 6. Convites recebem senha temporária por Resend, podem ser compartilhados por WhatsApp e exigem troca no primeiro acesso.
-7. Qualquer membro ativo cria agendamentos com cliente, telefone opcional, horário sugerido, preço, duração, agente e atendente.
+7. Qualquer membro ativo cria agendamentos com cliente, telefone opcional, horário sugerido, valor, duração digitada em `HH:MM`, agente e atendente.
 8. O telefone identifica e cadastra o cliente automaticamente; números repetidos reutilizam o cadastro existente.
 9. Todos os papéis recebem a agenda compartilhada e podem editar, remarcar, concluir, cancelar, marcar falta ou excluir agendamentos.
 10. Mudanças relevantes ficam registradas no histórico.
-11. Fechamento diário e relatórios por dia, semana ou mês calculam faturamento, comissão, pagamentos e saldo acumulado, com exportação em PDF.
+11. Fechamento diário e relatórios por dia, semana ou mês calculam faturamento bruto, líquido do atendente (`bruto - comissão`), comissão, pagamentos e saldo acumulado, com exportação em PDF.
 12. Proprietário/admin configura comissão fixa ou percentual e duração padrão.
 
 ## Rodar localmente
@@ -46,6 +46,7 @@ O deploy só deve acontecer depois de todos os gates em [`docs/DEPLOYMENT.md`](d
 - O banco impede sobreposição de atendimentos por atendente.
 - O banco rejeita novos agendamentos e remarcações para horários passados.
 - Comissão usa snapshot protegido no banco.
+- O banco calcula e armazena o líquido do atendente como `valor bruto - comissão`.
 - Cada tenant possui exatamente um proprietário, que não pode ser removido, desativado ou rebaixado.
 - Papel e tenant dos convidados vêm de `app_metadata` criada somente no servidor.
 - O desafio anti-spam é validado no servidor e usa assinatura HMAC.
